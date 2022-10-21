@@ -132,7 +132,7 @@ class IceCreamMachine:
             self.pick_toppings(toppings)
 
     def handle_pay(self, expected, total):
-        if total == str(expected):
+        if total == f"{expected:.2f}":
             print("Thank you! Enjoy your icecream!")
             self.total_icecreams += 1
             self.total_sales += expected # only if successful
@@ -142,7 +142,10 @@ class IceCreamMachine:
             
     def calculate_cost(self):
         # TODO add the calculation expression/logic for the inprogress_icecream
-        return 10000
+        self.cost = 0
+        for item in self.inprogress_icecream:
+            self.cost += item.cost
+        return round(self.cost, 2)
 
     def run(self):
         if self.currently_selecting == STAGE.Container:
@@ -156,7 +159,7 @@ class IceCreamMachine:
             self.handle_toppings(toppings)
         elif self.currently_selecting == STAGE.Pay:
             expected = self.calculate_cost()
-            total = input(f"Your total is {expected}, please enter the exact value.\n")
+            total = input(f"Your total is {expected:.2f}, please enter the exact value.\n")
             self.handle_pay(expected, total)
             choice = input("What would you like to do? (icecream or quit)\n")
             if choice == "quit":
