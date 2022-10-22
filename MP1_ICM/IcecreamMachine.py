@@ -40,7 +40,7 @@ class STAGE(Enum):
 
 class IceCreamMachine:
     # Constants https://realpython.com/python-constants/
-    USES_UNTIL_CLEANING = 100
+    USES_UNTIL_CLEANING = 2
     MAX_SCOOPS = 3
     MAX_TOPPINGS = 3
 
@@ -163,25 +163,34 @@ class IceCreamMachine:
                 try:
                     self.handle_toppings(toppings)
                 except:
-                    print("Sorry! You've exceeded the maximum number of toppings that you can select; proceeding to the payment portal")
+                    print("Sorry! You've exceeded the maximum number of toppings; proceeding to the payment portal")
                     self.currently_selecting = STAGE.Pay
             elif self.currently_selecting == STAGE.Pay:
-                expected = self.calculate_cost()
-                total = input(f"Your total is ${expected:.2f}, please enter the exact value.\n")
-                try:
-                    self.handle_pay(expected, total)
-                except InvalidPaymentException:
-                    print("You've entered a wrong amount. Please try again :)")
-                    self.run()
-                choice = input("What would you like to do? (icecream or quit)\n")
-                if choice == "quit":
-                    exit()
+                #Icecream should have atleast 1 scoop or topping
+                for item in self.inprogress_icecream:
+                    if item in set(self.flavors).union(set(self.toppings)):
+                        expected = self.calculate_cost()
+                        total = input(f"Your total is ${expected:.2f}, please enter the exact value.\n")
+                        try:
+                            self.handle_pay(expected, total)
+                        except InvalidPaymentException:
+                            print("You've entered a wrong amount. Please try again :)")
+                            self.run()
+                        choice = input("What would you like to do? (icecream or quit)\n")
+                        if choice == "quit":
+                            exit()
+                        break
+                print("Please choose at least one scoop or topping.")
+                self.currently_selecting = STAGE.Flavor
+                self.run()
+                
         except OutOfStockException:
             print("The selected option is out of stock. Please select another option")
         except NeedsCleaningException:
-            print("Sorry, The machine needs cleaning! Please try again..")
-            self.clean_machine()
-            self.reset()
+            choice = input("Sorry, The machine needs cleaning! Please type yes to clean the machine \n")
+            if choice.lower() == "yes":
+                print("The machine has been cleaned, you can continue")
+                self.clean_machine()
         except InvalidChoiceException:
             print("You've entered an invalid choice. Please choose from the given options")
         self.run()
