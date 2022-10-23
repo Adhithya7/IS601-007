@@ -25,7 +25,3 @@ class NoItemChosenException(Exception):
 class InvalidCombinationException(Exception):
     """Raised when a topping or scoop is picked before a container"""
     pass
-
-class ItemChosenAlready(Exception):
-    """Raised when a container is chosen already"""
-    pass
