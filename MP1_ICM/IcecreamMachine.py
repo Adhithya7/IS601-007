@@ -146,6 +146,9 @@ class IceCreamMachine:
         else:
             raise InvalidPaymentException
             
+    # UCID: ap2823
+    # Date: 10/23/2022
+    # Method to calculate cost of the icecream in progress       
     def calculate_cost(self):
         self.cost = 0
         for item in self.inprogress_icecream:
@@ -153,6 +156,8 @@ class IceCreamMachine:
         return round(self.cost, 2)
 
     def run(self):
+        # UCID: ap2823
+        # Date: 10/23/2022
         try:
             if self.currently_selecting == STAGE.Container:
                 container = input(f"Would you like a {', '.join(list(map(lambda c:c.name.lower(), filter(lambda c: c.in_stock(), self.containers))))}?\n")
@@ -161,6 +166,9 @@ class IceCreamMachine:
                 flavor = input(f"Would you like {', '.join(list(map(lambda f:f.name.lower(), filter(lambda f: f.in_stock(), self.flavors))))}? Or type next.\n")
                 try:
                     self.handle_flavor(flavor)
+                # UCID: ap2823
+                # Date: 10/23/2022
+                # If maximum number of choices are exceeded for flavors, the stage is automatically changed to toppings
                 except ExceededRemainingChoicesException:
                     print("Sorry! You've exceeded the maximum number of flavors that you can select, please choose a topping")
                     self.currently_selecting = STAGE.Toppings
@@ -168,9 +176,15 @@ class IceCreamMachine:
                 toppings = input(f"Would you like {', '.join(list(map(lambda t:t.name.lower(), filter(lambda t: t.in_stock(), self.toppings))))}? Or type done.\n")
                 try:
                     self.handle_toppings(toppings)
+                # UCID: ap2823
+                # Date: 10/23/2022
+                # If maximum number of choices are exceeded for toppings, the stage is automatically changed to pay
                 except ExceededRemainingChoicesException:
                     print("Sorry! You've exceeded the maximum number of toppings; proceeding to the payment portal")
                     self.currently_selecting = STAGE.Pay
+                # UCID: ap2823
+                # Date: 10/23/2022
+                # The stage is changed to Flavor if at all no scoop or topping is chosen.
                 except NoItemChosenException:
                     print("Please choose at least one scoop or topping.")
                     self.currently_selecting = STAGE.Flavor
@@ -179,19 +193,31 @@ class IceCreamMachine:
                 total = input(f"Your total is ${expected:.2f}, please enter the exact value.\n")
                 try:
                     self.handle_pay(expected, total)
+                # UCID: ap2823
+                # Date: 10/23/2022
+                # If the entered amount doesn't match the total, the user is prompted with a message to try again.
                 except InvalidPaymentException:
                     print("You've entered a wrong amount. Please try again :)")
                     self.run()
                 choice = input("What would you like to do? (icecream or quit)\n")
                 if choice == "quit":
                     exit()
+        # UCID: ap2823
+        # Date: 10/23/2022
+        # If any of the item is out of stock, the user is prompted with a message to choose a different item
         except OutOfStockException:
             print("The selected option is out of stock. Please select another option")
+        # UCID: ap2823
+        # Date: 10/23/2022
+        # The user is prompted with a message to clean the machine. If yes, the machine is cleaned and the user can resume
         except NeedsCleaningException:
             choice = input("Sorry, The machine needs cleaning! Please type yes to clean the machine \n")
             if choice.lower() == "yes":
                 print("The machine has been cleaned, you can continue")
                 self.clean_machine()
+        # UCID: ap2823
+        # Date: 10/23/2022
+        # If the entered choice is an invalid choice, the user is prompted with a message to choose again.
         except InvalidChoiceException:
             print("You've entered an invalid choice. Please choose from the given options")
         self.run()
