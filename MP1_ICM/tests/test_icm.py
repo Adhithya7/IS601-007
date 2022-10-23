@@ -30,6 +30,8 @@ def second_order(first_order, machine):
     machine.handle_pay(machine.calculate_cost(), f"{machine.calculate_cost():.2f}")
     return machine
 
+# UCID: ap2823
+# Date: 10/23/2022
 @pytest.fixture
 def third_order(second_order, machine):
     machine.handle_container("Sugar Cone")
@@ -40,6 +42,10 @@ def third_order(second_order, machine):
     machine.handle_pay(machine.calculate_cost(), f"{machine.calculate_cost():.2f}")
     return machine
 
+# UCID: ap2823
+# Date: 10/23/2022
+# Checks if an exception is raised when a flavor/topping is picked before
+# a container is picked.
 def test_first_selection(machine):
     try:
         machine.handle_flavor("vanilla")
@@ -48,6 +54,9 @@ def test_first_selection(machine):
     except InvalidCombinationException:
         assert True
 
+# UCID: ap2823
+# Date: 10/23/2022
+# Checks if an exception is raised when an out of stock flavor is chosen
 def test_flavors_instock(machine):
     try:
         machine.reset()
@@ -60,6 +69,9 @@ def test_flavors_instock(machine):
         machine.flavors[0].quantity=tmp
         assert True
 
+# UCID: ap2823
+# Date: 10/23/2022
+# Checks if an exception is raised when an out of stock topping is chosen
 def test_toppings_instock(machine):
     try:
         machine.reset()
@@ -73,6 +85,9 @@ def test_toppings_instock(machine):
         machine.toppings[0].quantity = tmp
         assert True
 
+# UCID: ap2823
+# Date: 10/23/2022
+# Checks if an exception is raised when more that 3 scoops are picked
 def test_max_flavors(machine):
     try:
         machine.reset()
@@ -85,6 +100,9 @@ def test_max_flavors(machine):
     except ExceededRemainingChoicesException:
         assert True
 
+# UCID: ap2823
+# Date: 10/23/2022
+# Checks if an exception is raised when more that 3 toppings are picked
 def test_max_toppings(machine):
     try:
         machine.handle_container("cup")
@@ -96,6 +114,10 @@ def test_max_toppings(machine):
     except ExceededRemainingChoicesException:
         assert True
 
+# UCID: ap2823
+# Date: 10/23/2022
+# Checks if the cost returned by the calculate_cost method is correct
+# This check is tested for 4 different combinations of cup,flavor and topping
 def test_cost_calculation(machine):
     for i in range(4):
         expected_cost = 0
@@ -113,11 +135,19 @@ def test_cost_calculation(machine):
     machine.reset()
     assert True 
 
+# UCID: ap2823
+# Date: 10/23/2022
+# Checks if total_sales is calculated properly. This is checked by making use of fixtures
+# and simulating three different purchases.
 def test_total_sales(third_order):
     first_order_expected_cost = 2
     second_order_expected_cost = 2.5
     third_order_expected_cost = 2.25
     assert third_order.total_sales == first_order_expected_cost + second_order_expected_cost + third_order_expected_cost
 
+# UCID: ap2823
+# Date: 10/23/2022
+# Checks if total_icecream is incremented properly. This is checked by making use of fixtures
+# and simulating three different purchases.
 def test_total_icecream(third_order):
     assert third_order.total_icecreams == 3
