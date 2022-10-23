@@ -189,6 +189,8 @@ class IceCreamMachine:
                     print("Please choose at least one scoop or topping.")
                     self.currently_selecting = STAGE.Flavor
             elif self.currently_selecting == STAGE.Pay:
+                # UCID: ap2823
+                # Date: 10/23/2022
                 expected = self.calculate_cost()
                 total = input(f"Your total is ${expected:.2f}, please enter the exact value.\n")
                 try:
