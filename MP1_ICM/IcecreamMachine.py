@@ -2,7 +2,7 @@ from enum import Enum
 # make a tests folder under the folder you're putting these files in
 # add an empty __init__.py to the tests folder
 from IcecreamExceptions import ExceededRemainingChoicesException, InvalidChoiceException, NeedsCleaningException, OutOfStockException
-from IcecreamExceptions import InvalidPaymentException
+from IcecreamExceptions import InvalidPaymentException, NoItemChosenException, InvalidCombinationException
 
 class Usable:
     name = ""
@@ -120,14 +120,20 @@ class IceCreamMachine:
         self.currently_selecting = STAGE.Flavor
 
     def handle_flavor(self, flavor):
-        if flavor == "next":
+        if not self.inprogress_icecream:
+            raise InvalidCombinationException
+        elif flavor == "next":
             self.currently_selecting = STAGE.Toppings
         else:
             self.pick_flavor(flavor)
 
     def handle_toppings(self, toppings):
-        if toppings == "done":
+        if not self.inprogress_icecream:
+            raise InvalidCombinationException
+        if toppings == "done" and any(item in self.flavors + self.toppings for item in self.inprogress_icecream):
             self.currently_selecting = STAGE.Pay
+        elif toppings == "done":
+            raise NoItemChosenException
         else:
             self.pick_toppings(toppings)
 
@@ -162,28 +168,23 @@ class IceCreamMachine:
                 toppings = input(f"Would you like {', '.join(list(map(lambda t:t.name.lower(), filter(lambda t: t.in_stock(), self.toppings))))}? Or type done.\n")
                 try:
                     self.handle_toppings(toppings)
-                except:
+                except ExceededRemainingChoicesException:
                     print("Sorry! You've exceeded the maximum number of toppings; proceeding to the payment portal")
                     self.currently_selecting = STAGE.Pay
+                except NoItemChosenException:
+                    print("Please choose at least one scoop or topping.")
+                    self.currently_selecting = STAGE.Flavor
             elif self.currently_selecting == STAGE.Pay:
-                #Icecream should have atleast 1 scoop or topping
-                for item in self.inprogress_icecream:
-                    if item in set(self.flavors).union(set(self.toppings)):
-                        expected = self.calculate_cost()
-                        total = input(f"Your total is ${expected:.2f}, please enter the exact value.\n")
-                        try:
-                            self.handle_pay(expected, total)
-                        except InvalidPaymentException:
-                            print("You've entered a wrong amount. Please try again :)")
-                            self.run()
-                        choice = input("What would you like to do? (icecream or quit)\n")
-                        if choice == "quit":
-                            exit()
-                        break
-                print("Please choose at least one scoop or topping.")
-                self.currently_selecting = STAGE.Flavor
-                self.run()
-                
+                expected = self.calculate_cost()
+                total = input(f"Your total is ${expected:.2f}, please enter the exact value.\n")
+                try:
+                    self.handle_pay(expected, total)
+                except InvalidPaymentException:
+                    print("You've entered a wrong amount. Please try again :)")
+                    self.run()
+                choice = input("What would you like to do? (icecream or quit)\n")
+                if choice == "quit":
+                    exit()
         except OutOfStockException:
             print("The selected option is out of stock. Please select another option")
         except NeedsCleaningException:

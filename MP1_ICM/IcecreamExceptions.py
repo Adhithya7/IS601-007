@@ -17,3 +17,15 @@ class ExceededRemainingChoicesException(Exception):
 class InvalidPaymentException(Exception):
     """Raised when an invalid payment amount is given"""
     pass
+
+class NoItemChosenException(Exception):
+    """Raised when atleast one topping or scoop isn't picked"""
+    pass
+
+class InvalidCombinationException(Exception):
+    """Raised when a topping or scoop is picked before a container"""
+    pass
+
+class ItemChosenAlready(Exception):
+    """Raised when a container is chosen already"""
+    pass
