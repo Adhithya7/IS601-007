@@ -40,7 +40,7 @@ class STAGE(Enum):
 
 class IceCreamMachine:
     # Constants https://realpython.com/python-constants/
-    USES_UNTIL_CLEANING = 2
+    USES_UNTIL_CLEANING = 100
     MAX_SCOOPS = 3
     MAX_TOPPINGS = 3
 

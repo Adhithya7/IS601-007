@@ -1,9 +1,10 @@
 import pytest
+import random
 # make sure there's an __init__.py in this tests folder and that
 # the tests folder is in the same folder as the IcecreamMachine stuff
 from IcecreamMachine import IceCreamMachine
-from IcecreamExceptions import ExceededRemainingChoicesException, InvalidChoiceException, NeedsCleaningException, OutOfStockException
-from IcecreamExceptions import InvalidPaymentException, NoItemChosenException, InvalidCombinationException
+from IcecreamExceptions import ExceededRemainingChoicesException, OutOfStockException
+from IcecreamExceptions import InvalidCombinationException
 
 @pytest.fixture
 def machine():
@@ -12,20 +13,31 @@ def machine():
     
 @pytest.fixture
 def first_order(machine):
+    machine.reset()
     machine.handle_container("cup")
     machine.handle_flavor("vanilla")
     machine.handle_flavor("next")
     machine.handle_toppings("done")
-    machine.handle_pay(10000,"10000.00")
+    machine.handle_pay(machine.calculate_cost(), f"{machine.calculate_cost():.2f}")
     return machine
     
 @pytest.fixture
 def second_order(first_order, machine):
-    machine.handle_container("cup")
-    machine.handle_flavor("vanilla")
+    machine.handle_container("Waffle Cone")
+    machine.handle_flavor("strawberry")
     machine.handle_flavor("next")
     machine.handle_toppings("done")
-    machine.handle_pay(10000,"10000.00")
+    machine.handle_pay(machine.calculate_cost(), f"{machine.calculate_cost():.2f}")
+    return machine
+
+@pytest.fixture
+def third_order(second_order, machine):
+    machine.handle_container("Sugar Cone")
+    machine.handle_flavor("chocolate")
+    machine.handle_flavor("next")
+    machine.handle_toppings("peanuts")
+    machine.handle_toppings("done")
+    machine.handle_pay(machine.calculate_cost(), f"{machine.calculate_cost():.2f}")
     return machine
 
 def test_first_selection(machine):
@@ -38,27 +50,74 @@ def test_first_selection(machine):
 
 def test_flavors_instock(machine):
     try:
+        machine.reset()
+        tmp = machine.flavors[0].quantity
         machine.flavors[0].quantity=0
         machine.handle_container("cup")
         machine.handle_flavor(machine.flavors[0].name)
         assert False
     except OutOfStockException:
+        machine.flavors[0].quantity=tmp
         assert True
 
-def test_toppings_instock():
-    pass
+def test_toppings_instock(machine):
+    try:
+        machine.reset()
+        tmp = machine.toppings[0].quantity
+        machine.toppings[0].quantity=0
+        machine.handle_container("cup")
+        machine.handle_flavor(machine.flavors[0].name)
+        machine.handle_toppings(machine.toppings[0].name)
+        assert False
+    except OutOfStockException:
+        machine.toppings[0].quantity = tmp
+        assert True
 
-def test_max_flavors():
-    pass
+def test_max_flavors(machine):
+    try:
+        machine.reset()
+        machine.handle_container("cup")
+        machine.handle_flavor(machine.flavors[0].name)
+        machine.handle_flavor(machine.flavors[0].name)
+        machine.handle_flavor(machine.flavors[0].name)
+        machine.handle_flavor(machine.flavors[0].name)
+        assert False
+    except ExceededRemainingChoicesException:
+        assert True
 
-def test_max_toppings():
-    pass
+def test_max_toppings(machine):
+    try:
+        machine.handle_container("cup")
+        machine.handle_toppings(machine.toppings[0].name)
+        machine.handle_toppings(machine.toppings[0].name)
+        machine.handle_toppings(machine.toppings[0].name)
+        machine.handle_toppings(machine.toppings[0].name)
+        assert False
+    except ExceededRemainingChoicesException:
+        assert True
 
-def test_cost_calculation():
-    pass
+def test_cost_calculation(machine):
+    for i in range(4):
+        expected_cost = 0
+        machine.reset()
+        random_container = random.choice(machine.containers)
+        random_flavor = random.choice(machine.flavors)
+        random_topping = random.choice(machine.toppings)
+        expected_cost = random_container.cost + random_flavor.cost + random_topping.cost
+        machine.handle_container(random_container.name)
+        machine.handle_flavor(random_flavor.name)
+        machine.handle_toppings(random_topping.name)
+        if f"{expected_cost:.2f}" != f"{machine.calculate_cost():.2f}":
+            assert False
+        machine.handle_pay(machine.calculate_cost(), f"{expected_cost:.2f}")
+    machine.reset()
+    assert True 
 
-def test_total_sales():
-    pass
+def test_total_sales(third_order):
+    first_order_expected_cost = 2
+    second_order_expected_cost = 2.5
+    third_order_expected_cost = 2.25
+    assert third_order.total_sales == first_order_expected_cost + second_order_expected_cost + third_order_expected_cost
 
-def test_total_icecream():
-    pass
+def test_total_icecream(third_order):
+    assert third_order.total_icecreams == 3
