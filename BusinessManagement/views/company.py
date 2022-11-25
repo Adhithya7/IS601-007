@@ -33,7 +33,7 @@ def search():
             query += f" and {filter} = %s"
             args.append(request.args.get(filter))
     if request.args.get("order") and request.args.get("column"):
-        if request.args.get("column") in ["name","val","created","modified"] \
+        if request.args.get("column") in allowed_columns \
             and request.args.get("order") in ["asc", "desc"]:
             query += f" ORDER BY %s %s"
             args.append(request.args.get('column'))
@@ -64,6 +64,8 @@ def add():
         form = Company()
         form_data = {}
         has_error = False
+        if not form.validate_on_submit():
+            return render_template("add_company.html", form=form)
         # TODO add-1 retrieve form data for name, address, city, state, country, zip, website
         # TODO add-2 name is required (flash proper error message)
         # TODO add-3 address is required (flash proper error message)
@@ -74,8 +76,8 @@ def add():
         form_data["name"] = form.name.data
         form_data["address"] = form.address.data
         form_data["city"] = form.city.data
-        form_data["country"] = form.country.data
-        form_data["state"] = form.state.data
+        form_data["country"] = request.form.get("country")
+        form_data["state"] = request.form.get("state")
         form_data["zip_code"] = form.zip_code.data
         form_data["website"] = form.website.data
         for k,v in form_data.items():
@@ -96,7 +98,7 @@ def add():
                 # TODO add-9 make message user friendly
                 print(tb.format_exc)
                 flash(f"Unexpected error while trying to add company: {e}", "danger")
-    return render_template("add_company.html")
+    return render_template("add_company.html", form=form)
 
 @company.route("/edit", methods=["GET", "POST"])
 def edit():
@@ -117,11 +119,13 @@ def edit():
             form_data = {}
             form = Company()
             has_error = False
+            if not form.validate_on_submit():
+                return render_template("edit_company.html.html", form=form)
             form_data["name"] = form.name.data
             form_data["address"] = form.address.data
             form_data["city"] = form.city.data
-            form_data["country"] = form.country.data
-            form_data["state"] = form.state.data
+            form_data["country"] = request.form.get("country")
+            form_data["state"] = request.form.get("state")
             form_data["zip_code"] = form.zip_code.data
             form_data["website"] = form.website.data
             form_data["id"] = request.args.get('id')
@@ -157,7 +161,7 @@ def edit():
     else:
         flash("Company ID is missing", "danger")
     # TODO edit-13 pass the company data to the render template
-    return render_template("edit_company.html", ...)
+    return render_template("edit_company.html", form=form)
 
 @company.route("/delete", methods=["GET"])
 def delete():

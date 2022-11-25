@@ -1,19 +1,18 @@
 {% extends "layout.html" %}
 {% block title %}Add Employee{% endblock %}
 {% block content %}
+{% from "_formhelpers.html" import render_field %}
 <div class="container-fluid">
     <div class="h1">Add Employee</div>
     <div>
         <form method="POST">
-            {#
-            generate fields with proper types for
-            first_name
-            last_name
-            email
-            #}
+            { form.hidden_tag() }}
+            {{render_field(form.first_name)}}
+            {{render_field(form.last_name)}}
+            {{render_field(form.email)}}
             {# use the below for company selection #}
             {% include "company_dropdown.html" %}
-            <input type="submit" class="btn btn-primary" value="Save Employee" />
+            {{form.submit(class="btn btn-primary")}}
         </form>
     </div>
 </div>

@@ -1,20 +1,19 @@
 {% extends "layout.html" %}
 {% block title %}Add Company{% endblock %}
 {% block content %}
+{% from "_formhelpers.html" import render_field %}
 <div class="container-fluid">
     <div class="h1">Add Company</div>
     <div>
         <form method="POST">
-            {#
-            generate fields with proper types for
-            name
-            address
-            city
-            website
-            #}
+            { form.hidden_tag() }}
+            {{render_field(form.name)}}
+            {{render_field(form.address)}}
+            {{render_field(form.city)}}
+            {{render_field(form.website)}}
             {# use this for country/state selection #}
             {% include "country_state_selector.html" %}
-            <input type="submit" class="btn btn-primary" value="Save Company" />
+            {{form.submit(class="btn btn-primary")}}
         </form>
     </div>
 </div>

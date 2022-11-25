@@ -32,7 +32,7 @@ def search():
         query += f" and company = %s"
         args.append(request.args.get('company'))
     if request.args.get("order") and request.args.get("column"):
-        if request.args.get("column") in ["name","val","created","modified"] \
+        if request.args.get("column") in allowed_columns \
             and request.args.get("order") in ["asc", "desc"]:
             query += f" ORDER BY %s %s"
             args.append(request.args.get('column'))
@@ -68,9 +68,11 @@ def add():
         # TODO add-3 last_name is required (flash proper error message)
         # TODO add-4 company (may be None)
         # TODO add-5 email is required (flash proper error message)
+        if not form.validate_on_submit():
+            return render_template("add_employee.html", form=form)
         form_data["first_name"] = form.first_name.data
         form_data["last_name"] = form.last_name.data
-        form_data["company"] = form.company.data
+        form_data["company"] = request.form.get("company")
         form_data["email"] = form.email.data
         for k,v in form_data.items():
             if k != "company" and not v:
@@ -100,6 +102,8 @@ def edit():
             form_data = {}
             form = Employee()
             field_missing = False
+            if not form.validate_on_submit():
+                return render_template("edit_employee.html", form=form)
             # TODO edit-1 retrieve form data for first_name, last_name, company, email
             # TODO edit-2 first_name is required (flash proper error message)
             # TODO edit-3 last_name is required (flash proper error message)
@@ -107,7 +111,7 @@ def edit():
             # TODO edit-5 email is required (flash proper error message)
             form_data["first_name"] = form.first_name.data
             form_data["last_name"] = form.last_name.data
-            form_data["company"] = form.company.data
+            form_data["company"] = request.form.get("company")
             form_data["email"] = form.email.data
             form_data["id"] = request.args.get('id')
             for k,v in form_data.items():
@@ -145,7 +149,7 @@ def edit():
     else:
         flash("Employee ID is missing", "danger")
     # TODO edit-10 pass the employee data to the render template
-    return render_template("edit_employee.html", row)
+    return render_template("edit_employee.html", form=form)
 
 @employee.route("/delete", methods=["GET"])
 def delete():
