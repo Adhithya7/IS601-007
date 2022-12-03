@@ -15,15 +15,34 @@
         ensure all fields prefill with request arg data if provided
         #}
         <div class="col-12">
+            <label class="form-label" for="first_name">First Name</label>
+            <input type="text" name="first_name" class="form-control" id="first_name" placeholder="First Name"
+                value="{{request.args.get('first_name') or ''}}">
+        </div>
+        <div class="col-12">
+            <label class="form-label" for="last_name">Last Name</label>
+            <input type="text" name="last_name" class="form-control" id="last_name" placeholder="Last Name"
+                value="{{request.args.get('last_name') or ''}}">
+        </div>
+        <div class="col-12">
+            <label class="form-label" for="email">email</label>
+            <input type="text" name="email" class="form-control" id="email" placeholder="email"
+                value="{{request.args.get('email') or ''}}">
+        </div>
+        <div class="col-12">
             <label class="visually-hidden" for="company">Company</label>
             {% with val = request.args.get("company", '') %}
             {% include "company_dropdown.html" %}
             {% endwith %}
         </div>
-        {% with cols = [] %}
+        {% with cols = allowed_columns %}
         {% include "sort_filter.html" %}
         {% endwith %}
-        
+        <div class="col-12">
+            <label class="form-label" for="limit">Limit</label>
+            <input class="form-control" type="number" min="1" max="100" id="limit" name="limit"
+                value="{{request.args.get('limit') or '10'}}" />
+        </div>
         <div class="col-12">
             <input type="submit" class="btn btn-primary" value="Filter" />
         </div>

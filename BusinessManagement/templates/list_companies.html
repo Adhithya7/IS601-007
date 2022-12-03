@@ -12,13 +12,22 @@
     ensure all fields prefill with request arg data if provided
     #}
     <form method="GET">
+        <div class="col-12">
+            <label class="form-label" for="name">Name</label>
+            <input type="text" name="name" class="form-control" id="name" placeholder="Name"
+                value="{{request.args.get('name') or ''}}">
+        </div>
         {% with layout = "horizontal" %}
         {% include "country_state_selector.html" %}
         {% endwith %}
-        {% with cols = [] %}
+        {% with cols = allowed_columns %}
         {% include "sort_filter.html" %}
         {% endwith %}
-        
+        <div class="col-12">
+            <label class="form-label" for="limit">Limit</label>
+            <input class="form-control" type="number" min="1" max="100" id="limit" name="limit"
+                value="{{request.args.get('limit') or '10'}}" />
+        </div>
         <div class="col-12">
             <input type="submit" class="btn btn-primary" value="Filter" />
         </div>
