@@ -34,9 +34,12 @@ def runner(app):
 
 #https://pypi.org/project/pytest-order/
 @pytest.mark.order("second_to_last")
-def edit_company(client):
+def test_edit_company(client):
     resp = client.post("/company/edit?id=-1", data={
         "name": "_test-company",
+        "address" : "123 fun st.",
+        "country" : "US",
+        "state": "NJ",
         "city": "Testville"
     }, follow_redirects=True )
     assert resp.status_code == 200
@@ -47,7 +50,8 @@ def edit_company(client):
     form = soup.form
     ele = form.select("[name='city']")[0]
     print(ele)
+    # TODO the dropdown option doesn't need to exist, it just needs to
+    # be set on the select element so this is fine
     assert ele.get("value") == 'Testville'
     ele = form.select("[name='name']")[0]
     assert ele.get("value") == "_test-company"
-
