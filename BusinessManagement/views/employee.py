@@ -60,7 +60,7 @@ def search():
 
 @employee.route("/add", methods=["GET","POST"])
 def add():
-    form = Employee()
+    form = Employee(request.form)
     if request.method == "POST":
         form_data = {}
         field_missing = False
@@ -69,12 +69,11 @@ def add():
         # TODO add-3 last_name is required (flash proper error message)
         # TODO add-4 company (may be None)
         # TODO add-5 email is required (flash proper error message)
-        if not form.validate_on_submit():
-            return render_template("add_employee.html", form=form)
-        form_data["first_name"] = form.first_name.data
-        form_data["last_name"] = form.last_name.data
+        # if not form.validate_on_submit():
+        #     return render_template("add_employee.html", form=form)
+        form_data["first_name"] = form.first_name.data or request.form.get("first name")
+        form_data["last_name"] = form.last_name.data or request.form.get("last name")
         form_data["company"] = request.form.get("company") or None
-        print("values", form_data.values())
         form_data["email"] = form.email.data
         for k,v in form_data.items():
             if k != "company" and not v:
@@ -99,24 +98,23 @@ def add():
 def edit():
     # TODO edit-1 request args id is required (flash proper error message)
     row = None
-    form = Employee()
+    form = Employee(request.form)
     if request.args.get('id'): # TODO update this for TODO edit-1
         if request.method == "POST":
             form_data = {}
             field_missing = False
-            if not form.validate_on_submit():
-                return render_template("edit_employee.html", form=form)
+            # if not form.validate_on_submit():
+            #     return render_template("edit_employee.html", form=form)
             # TODO edit-1 retrieve form data for first_name, last_name, company, email
             # TODO edit-2 first_name is required (flash proper error message)
             # TODO edit-3 last_name is required (flash proper error message)
             # TODO edit-4 company may be None
             # TODO edit-5 email is required (flash proper error message)
-            form_data["first_name"] = form.first_name.data
-            form_data["last_name"] = form.last_name.data
+            form_data["first_name"] = form.first_name.data or request.form.get("first name")
+            form_data["last_name"] = form.last_name.data or request.form.get("last name")
             form_data["company"] = request.form.get("company") or None
             form_data["email"] = form.email.data
             form_data["id"] = request.args.get('id')
-            print("company", form_data["company"])
             for k,v in form_data.items():
                 if k != "company" and not v:
                     flash(f"{k} is a mandatory field", "danger")
@@ -135,22 +133,23 @@ def edit():
                     print(tb.format_exc)
                     # TODO edit-7 make this user-friendly
                     flash(f"Unexpected error while trying to edit employee: {e}", "danger")
-                try:
-                    # TODO edit-8 fetch the updated data (including company_name)
-                    # company_name should be 'N/A' if the employee isn't assigned to a copany
-                    result = DB.selectOne("""
-                    SELECT * FROM IS601_MP2_Employees A
-                    LEFT JOIN IS601_MP2_Companies B on A.company_id=B.id
-                    WHERE A.id = %s
-                    """, form_data["id"])
-                    if result.status:
-                        row = result.row
-                        form = form.process_data(row)
-                        print(row)
-                except Exception as e:
-                    print(tb.format_exc())
-                    # TODO edit-9 make this user-friendly
-                    flash(f"Unexpected error while trying to fetch the updated employee: {e}", "danger")
+        try:
+            # TODO edit-8 fetch the updated data (including company_name)
+            # company_name should be 'N/A' if the employee isn't assigned to a copany
+            result = DB.selectOne("""
+            SELECT * FROM IS601_MP2_Employees A
+            LEFT JOIN IS601_MP2_Companies B on A.company_id=B.id
+            WHERE A.id = %s
+            """, request.args.get('id'))
+            if result.status:
+                row = result.row
+                form.first_name.data = row["first_name"]
+                form.last_name.data = row["last_name"]
+                form.email.data = row["email"]
+        except Exception as e:
+            print(tb.format_exc())
+            # TODO edit-9 make this user-friendly
+            flash(f"Unexpected error while trying to fetch the updated employee: {e}", "danger")
     else:
         flash("Employee ID is missing", "danger")
     # TODO edit-10 pass the employee data to the render template

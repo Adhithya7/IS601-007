@@ -10,5 +10,5 @@ class Company(FlaskForm):
     name = StringField("name", [InputRequired()])
     address = StringField("address", [InputRequired()])
     city = StringField("city", [InputRequired()])
-    zip_code = StringField("zip_code", [InputRequired()])
+    zip = StringField("zip_code", [InputRequired()])
     website = StringField("website")

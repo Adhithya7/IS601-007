@@ -60,14 +60,12 @@ def search():
 
 @company.route("/add", methods=["GET","POST"])
 def add():
-    form = Company()
-    print(request.args.__dict__)
-    print(request.form.__dict__)
+    form = Company(request.form)
     if request.method == "POST":
         form_data = {}
         has_error = False
-        if not form.validate_on_submit():
-            return render_template("add_company.html", form=form)
+        # if not form.validate_on_submit():
+        #     raise 
         # TODO add-1 retrieve form data for name, address, city, state, country, zip, website
         # TODO add-2 name is required (flash proper error message)
         # TODO add-3 address is required (flash proper error message)
@@ -80,9 +78,8 @@ def add():
         form_data["city"] = form.city.data
         form_data["country"] = request.form.get("country")
         form_data["state"] = request.form.get("state")
-        form_data["zip_code"] = form.zip_code.data
+        form_data["zip_code"] = form.zip.data
         form_data["website"] = form.website.data
-        print("country", form_data["country"])
         for k,v in form_data.items():
             if k != "website" and not v:
                 flash(f"{k} is a mandatory field", "danger")
@@ -105,7 +102,7 @@ def add():
 
 @company.route("/edit", methods=["GET", "POST"])
 def edit():
-    form = Company()
+    form = Company(request.form)
     # TODO edit-1 request args id is required (flash proper error message)
     if request.args.get('id'): # TODO update this for TODO edit-1
         if request.method == "POST":
@@ -121,20 +118,21 @@ def edit():
             #data = [name, address, city, state, country, zipcode, website]
             form_data = {}
             has_error = False
-            if not form.validate_on_submit():
-                return render_template("edit_company.html.html", form=form)
+            # if not form.validate_on_submit():
+            #     return render_template("edit_company.html.html", form=form)
             form_data["name"] = form.name.data
             form_data["address"] = form.address.data
             form_data["city"] = form.city.data
             form_data["country"] = request.form.get("country")
             form_data["state"] = request.form.get("state")
-            form_data["zip_code"] = form.zip_code.data
+            form_data["zip_code"] = form.zip.data
             form_data["website"] = form.website.data
             form_data["id"] = request.args.get('id')
             for k,v in form_data.items():
                 if k != "website" and not v:
                     flash(f"{k} is a mandatory field", "danger")
                     has_error = True
+            print("boi",form_data)
             if not has_error:
                 try:
                     # TODO edit-9 fill in proper update query
@@ -148,19 +146,26 @@ def edit():
                         flash("Updated record", "success")
                 except Exception as e:
                     print(tb.format_exc)
+                    print(e)
                     # TODO edit-10 make this user-friendly
                     flash(f"Unexpected error while trying to edit company: {e}", "danger")
-                try:
-                    # TODO edit-11 fetch the updated data
-                    result = DB.selectOne("""SELECT * FROM IS601_MP2_Companies
-                    WHERE id=%s""", form_data["id"])
-                    if result.status:
-                        row = result.row
-                        form = form.process(row)
-                except Exception as e:
-                    print(tb.format_exc())
-                    # TODO edit-12 make this user-friendly
-                    flash(f"Unexpected error while trying to fetch the updated company: {e}", "danger")
+        try:
+            # TODO edit-11 fetch the updated data
+            result = DB.selectOne("""SELECT * FROM IS601_MP2_Companies
+            WHERE id=%s""", request.args.get('id'))
+            if result.status:
+                row = result.row
+                print(row)
+                form.name.data = row['name']
+                form.address.data = row['address']
+                form.city.data = row['city']
+                form.zip.data = row['zip']
+                form.website.data = row['website']
+        except Exception as e:
+            print(tb.format_exc())
+            print(e)
+            # TODO edit-12 make this user-friendly
+            flash(f"Unexpected error while trying to fetch the updated company: {e}", "danger")
     else:
         flash("Company ID is missing", "danger")
     # TODO edit-13 pass the company data to the render template
