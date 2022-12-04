@@ -20,7 +20,7 @@
             {{render_field(form.email)}}
             {% with val = request.args.get("company", company or '') %}
             {% include "company_dropdown.html" %}
-            % endwith %
+            {% endwith %}
             <input type="submit" class="btn btn-primary" value="Save Employee" />
         </form>
     </div>
