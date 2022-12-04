@@ -186,7 +186,7 @@ def delete():
             constraint_fix = DB.update("""
             UPDATE IS601_MP2_Employees
             SET company_id = NULL
-            WHERE id = %s
+            WHERE company_id = %s
             """,cmp_id)
 
             result = DB.delete("""
