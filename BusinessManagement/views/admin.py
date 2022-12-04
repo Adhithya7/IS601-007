@@ -66,7 +66,7 @@ def importCSV():
                 try:
                     result = DB.insertMany(company_query, companies)
                     # TODO importcsv-5 display flash message about number of companies inserted
-                    flash(f"Inserted {len(companies)} companies")
+                    flash(f"Inserted {len(companies)} companies", "success")
                 except Exception as e:
                     traceback.print_exc()
                     flash("There was an error loading in the csv data", "danger")
