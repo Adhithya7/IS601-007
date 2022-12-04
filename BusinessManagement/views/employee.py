@@ -11,7 +11,7 @@ def search():
     rows = []
     # DO NOT DELETE PROVIDED COMMENTS
     # TODO search-1 retrieve employee id as id, first_name, last_name, email, company_id, company_name using a LEFT JOIN
-    query = """ SELECT A.id, first_name, last_name, email, company_id, name as company_name FROM IS601_MP2_Employees A
+    query = """ SELECT A.id, first_name, last_name, email, company_id, IF(name is not null, name,'N/A') as company_name FROM IS601_MP2_Employees A
                 LEFT JOIN IS601_MP2_Companies B on A.company_id=B.id
                 WHERE 1=1"""
     args = [] # <--- append values to replace %s placeholders
