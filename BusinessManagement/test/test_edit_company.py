@@ -40,6 +40,7 @@ def test_edit_company(client):
         "address" : "123 fun st.",
         "country" : "US",
         "state": "NJ",
+        "zip": "07104",
         "city": "Testville"
     }, follow_redirects=True )
     assert resp.status_code == 200
