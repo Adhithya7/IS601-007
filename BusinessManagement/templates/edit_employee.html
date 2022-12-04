@@ -14,11 +14,10 @@
             and prefill the fields with loaded employee data
             #}
             {# use the below for company selection #}
-            { form.hidden_tag() }}
-            {{render_field(form.name)}}
-            {{render_field(form.address)}}
-            {{render_field(form.city)}}
-            {{render_field(form.website)}}
+            {{form.hidden_tag()}}
+            {{render_field(form.first_name)}}
+            {{render_field(form.last_name)}}
+            {{render_field(form.email)}}
             {% include "company_dropdown.html" %}
             <input type="submit" class="btn btn-primary" value="Save Employee" />
         </form>

@@ -6,14 +6,15 @@
     <div class="h1">Add Company</div>
     <div>
         <form method="POST">
-            { form.hidden_tag() }}
+            {{form.hidden_tag()}}
             {{render_field(form.name)}}
             {{render_field(form.address)}}
             {{render_field(form.city)}}
+            {{render_field(form.zip_code)}}
             {{render_field(form.website)}}
             {# use this for country/state selection #}
             {% include "country_state_selector.html" %}
-            {{form.submit(class="btn btn-primary")}}
+            <input type="submit" class="btn btn-primary" value="submit" />
         </form>
     </div>
 </div>

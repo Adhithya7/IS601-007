@@ -1,7 +1,7 @@
 import traceback as tb
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sql.db import DB
-from forms import *
+from views.forms import *
 company = Blueprint('company', __name__, url_prefix='/company')
 
 @company.route("/search", methods=["GET"])
@@ -12,7 +12,7 @@ def search():
     # don't do SELECT *
     query = """SELECT id, name, address, city, country, state, zip, website,
                (SELECT count(*) from IS601_MP2_Employees A
-                WHERE A.company = B.id) AS employee_count
+                WHERE A.company_id = B.id) AS employee_count
                FROM IS601_MP2_Companies B
                WHERE 1=1"""
     args = [] # <--- append values to replace %s placeholders
@@ -39,7 +39,7 @@ def search():
             args.append(request.args.get('column'))
             args.append(request.args.get('order'))
     query += f" LIMIT %s"
-    ql = request.args.get('limit', 10)
+    ql = int(request.args.get('limit', 10))
     if ql < 1 or ql > 100:
         flash("limit value should be in the range of 1-100; Defaulting to 10")
         args.append(10)
@@ -56,12 +56,16 @@ def search():
         print(tb.format_exc)
         flash(f"Unexpected error while trying to search company: {e}", "danger")
     # hint: use allowed_columns in template to generate sort dropdown
+    allowed_columns = [(col,col) for col in allowed_columns]
+    print(rows)
     return render_template("list_companies.html", rows=rows, allowed_columns=allowed_columns)
 
 @company.route("/add", methods=["GET","POST"])
 def add():
+    form = Company()
+    print(request.args.__dict__)
+    print(request.form.__dict__)
     if request.method == "POST":
-        form = Company()
         form_data = {}
         has_error = False
         if not form.validate_on_submit():
@@ -80,6 +84,7 @@ def add():
         form_data["state"] = request.form.get("state")
         form_data["zip_code"] = form.zip_code.data
         form_data["website"] = form.website.data
+        print("country", form_data["country"])
         for k,v in form_data.items():
             if k != "website" and not v:
                 flash(f"{k} is a mandatory field", "danger")
@@ -88,7 +93,7 @@ def add():
             try:
                 result = DB.insertOne("""
                 INSERT INTO IS601_MP2_Companies (name, address, city, country,
-                state, zip_code, website)
+                state, zip, website)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """, *form_data.values()
                 ) # <-- TODO add-8 add query and add arguments
@@ -102,8 +107,8 @@ def add():
 
 @company.route("/edit", methods=["GET", "POST"])
 def edit():
+    form = Company()
     # TODO edit-1 request args id is required (flash proper error message)
-    row = None
     if request.args.get('id'): # TODO update this for TODO edit-1
         if request.method == "POST":
             # TODO edit-2 retrieve form data for name, address, city, state, country, zip, website
@@ -117,7 +122,6 @@ def edit():
             # note: call zip variable zipcode as zip is a built in function it could lead to issues
             #data = [name, address, city, state, country, zipcode, website]
             form_data = {}
-            form = Company()
             has_error = False
             if not form.validate_on_submit():
                 return render_template("edit_company.html.html", form=form)
@@ -154,6 +158,7 @@ def edit():
                     WHERE id=%s""", form_data["id"])
                     if result.status:
                         row = result.row
+                        form = form.process(row)
                 except Exception as e:
                     print(tb.format_exc())
                     # TODO edit-12 make this user-friendly
@@ -173,11 +178,11 @@ def delete():
         cmp_id = request.args.get("id")
         if not cmp_id:
             flash("Company ID is missing", "danger")
-            return render_template("list_companies.html")
+            return render_template("list_companies.html", **request.args)
         try:
             constraint_fix = DB.update("""
             UPDATE IS601_MP2_Employees
-            SET company = NULL
+            SET company_id = NULL
             WHERE id = %s
             """,cmp_id)
 
@@ -190,5 +195,7 @@ def delete():
                 flash("Deleted Record", "success")
         except Exception as e:
             flash(f"Unexpected error while trying to delete the Company: {e}", "danger")
-        del request.args["id"]
-    return redirect(url_for('search'))
+            return render_template("list_companies.html", **request.args)
+        new_args = dict(request.args)
+        del new_args["id"]
+    return redirect(url_for('company.search', **new_args))

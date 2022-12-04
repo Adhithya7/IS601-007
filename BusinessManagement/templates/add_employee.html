@@ -6,13 +6,13 @@
     <div class="h1">Add Employee</div>
     <div>
         <form method="POST">
-            { form.hidden_tag() }}
+            {{form.hidden_tag()}}
             {{render_field(form.first_name)}}
             {{render_field(form.last_name)}}
             {{render_field(form.email)}}
             {# use the below for company selection #}
             {% include "company_dropdown.html" %}
-            {{form.submit(class="btn btn-primary")}}
+            <input type="submit" class="btn btn-primary" value="submit" />
         </form>
     </div>
 </div>

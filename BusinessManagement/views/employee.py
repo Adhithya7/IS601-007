@@ -1,7 +1,8 @@
 import traceback as tb
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from sql.db import DB
-from forms import *
+from views.forms import *
+import copy
 employee = Blueprint('employee', __name__, url_prefix='/employee')
 
 
@@ -10,8 +11,8 @@ def search():
     rows = []
     # DO NOT DELETE PROVIDED COMMENTS
     # TODO search-1 retrieve employee id as id, first_name, last_name, email, company_id, company_name using a LEFT JOIN
-    query = """ SELECT A.id, first_name, last_name, email, company, name FROM IS601_MP2_Employees A
-                LEFT JOIN IS601_MP2_Companies B on A.company=B.id
+    query = """ SELECT A.id, first_name, last_name, email, company_id, name FROM IS601_MP2_Employees A
+                LEFT JOIN IS601_MP2_Companies B on A.company_id=B.id
                 WHERE 1=1"""
     args = [] # <--- append values to replace %s placeholders
     allowed_columns = ["first_name", "last_name", "email", "company_name"]
@@ -29,7 +30,7 @@ def search():
             query += f" and {filter} like %s"
             args.append(f"%{request.args.get(filter)}%")
     if request.args.get("company"):
-        query += f" and company = %s"
+        query += f" and company_id = %s"
         args.append(request.args.get('company'))
     if request.args.get("order") and request.args.get("column"):
         if request.args.get("column") in allowed_columns \
@@ -38,7 +39,7 @@ def search():
             args.append(request.args.get('column'))
             args.append(request.args.get('order'))
     query += f" LIMIT %s"
-    ql = request.args.get('limit', 10)
+    ql = int(request.args.get('limit', 10))
     if ql < 1 or ql > 100:
         flash("limit value should be in the range of 1-100; Defaulting to 10")
         args.append(10)
@@ -55,12 +56,13 @@ def search():
         print(tb.format_exc)
         flash(f"Unexpected error while trying to search employee: {e}", "danger")
     # hint: use allowed_columns in template to generate sort dropdown
+    allowed_columns = [(col,col) for col in allowed_columns]
     return render_template("list_employees.html", rows=rows, allowed_columns=allowed_columns)
 
 @employee.route("/add", methods=["GET","POST"])
 def add():
+    form = Employee()
     if request.method == "POST":
-        form = Employee()
         form_data = {}
         field_missing = False
         # TODO add-1 retrieve form data for first_name, last_name, company, email
@@ -72,7 +74,8 @@ def add():
             return render_template("add_employee.html", form=form)
         form_data["first_name"] = form.first_name.data
         form_data["last_name"] = form.last_name.data
-        form_data["company"] = request.form.get("company")
+        form_data["company"] = request.form.get("company") or None
+        print("values", form_data.values())
         form_data["email"] = form.email.data
         for k,v in form_data.items():
             if k != "company" and not v:
@@ -81,7 +84,7 @@ def add():
         if not field_missing:
             try:
                 result = DB.insertOne("""
-                INSERT INTO IS601_MP2_Employees (first_name, last_name, company, email)
+                INSERT INTO IS601_MP2_Employees (first_name, last_name, company_id, email)
                 VALUES (%s, %s, %s, %s)
                 """, *form_data.values()
                 ) # <-- TODO add-6 add query and add arguments
@@ -97,10 +100,10 @@ def add():
 def edit():
     # TODO edit-1 request args id is required (flash proper error message)
     row = None
+    form = Employee()
     if request.args.get('id'): # TODO update this for TODO edit-1
         if request.method == "POST":
             form_data = {}
-            form = Employee()
             field_missing = False
             if not form.validate_on_submit():
                 return render_template("edit_employee.html", form=form)
@@ -111,9 +114,10 @@ def edit():
             # TODO edit-5 email is required (flash proper error message)
             form_data["first_name"] = form.first_name.data
             form_data["last_name"] = form.last_name.data
-            form_data["company"] = request.form.get("company")
+            form_data["company"] = request.form.get("company") or None
             form_data["email"] = form.email.data
             form_data["id"] = request.args.get('id')
+            print("company", form_data["company"])
             for k,v in form_data.items():
                 if k != "company" and not v:
                     flash(f"{k} is a mandatory field", "danger")
@@ -123,7 +127,7 @@ def edit():
                     # TODO edit-6 fill in proper update query
                     result = DB.update("""
                     UPDATE IS601_MP2_Employees 
-                    SET first_name=%s, last_name=%s, company=%s, email=%s
+                    SET first_name=%s, last_name=%s, company_id=%s, email=%s
                     WHERE id=%s
                     """, *form_data.values())
                     if result.status:
@@ -137,11 +141,12 @@ def edit():
                     # company_name should be 'N/A' if the employee isn't assigned to a copany
                     result = DB.selectOne("""
                     SELECT * FROM IS601_MP2_Employees A
-                    LEFT JOIN IS601_MP2_Companies B on A.company=B.id
+                    LEFT JOIN IS601_MP2_Companies B on A.company_id=B.id
                     WHERE A.id = %s
                     """, form_data["id"])
                     if result.status:
                         row = result.row
+                        form = form.process_data(row)
                 except Exception as e:
                     print(tb.format_exc())
                     # TODO edit-9 make this user-friendly
@@ -171,5 +176,6 @@ def delete():
                 flash("Deleted Record", "success")
         except Exception as e:
             flash(f"Unexpected error while trying to delete the employee: {e}", "danger")
-        del request.args["id"]
-    return redirect(url_for('search'))
+        new_args = dict(request.args)
+        del new_args["id"]
+    return redirect(url_for("employee.search", **new_args))
