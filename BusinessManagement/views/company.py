@@ -35,9 +35,7 @@ def search():
     if request.args.get("order") and request.args.get("column"):
         if request.args.get("column") in allowed_columns \
             and request.args.get("order") in ["asc", "desc"]:
-            query += f" ORDER BY %s %s"
-            args.append(request.args.get('column'))
-            args.append(request.args.get('order'))
+            query += f" ORDER BY {request.args.get('column')} {request.args.get('order')}"
     query += f" LIMIT %s"
     ql = int(request.args.get('limit', 10))
     if ql < 1 or ql > 100:
