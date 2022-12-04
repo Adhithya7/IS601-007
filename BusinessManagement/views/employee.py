@@ -71,8 +71,8 @@ def add():
         # TODO add-5 email is required (flash proper error message)
         # if not form.validate_on_submit():
         #     return render_template("add_employee.html", form=form)
-        form_data["first_name"] = form.first_name.data or request.form.get("first name")
-        form_data["last_name"] = form.last_name.data or request.form.get("last name")
+        form_data["first_name"] = form.first_name.data
+        form_data["last_name"] = form.last_name.data
         form_data["company"] = request.form.get("company") or None
         form_data["email"] = form.email.data
         for k,v in form_data.items():
@@ -110,8 +110,8 @@ def edit():
             # TODO edit-3 last_name is required (flash proper error message)
             # TODO edit-4 company may be None
             # TODO edit-5 email is required (flash proper error message)
-            form_data["first_name"] = form.first_name.data or request.form.get("first name")
-            form_data["last_name"] = form.last_name.data or request.form.get("last name")
+            form_data["first_name"] = form.first_name.data
+            form_data["last_name"] = form.last_name.data
             form_data["company"] = request.form.get("company") or None
             form_data["email"] = form.email.data
             form_data["id"] = request.args.get('id')
