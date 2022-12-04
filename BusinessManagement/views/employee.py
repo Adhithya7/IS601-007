@@ -153,7 +153,7 @@ def edit():
     else:
         flash("Employee ID is missing", "danger")
     # TODO edit-10 pass the employee data to the render template
-    return render_template("edit_employee.html", form=form)
+    return render_template("edit_employee.html", form=form, company=row["company_id"])
 
 @employee.route("/delete", methods=["GET"])
 def delete():
