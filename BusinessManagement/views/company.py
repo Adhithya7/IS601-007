@@ -12,7 +12,7 @@ def search():
     # don't do SELECT *
     query = """SELECT id, name, address, city, country, state, zip, website,
                (SELECT count(*) from IS601_MP2_Employees A
-                WHERE A.company_id = B.id) AS employee_count
+                WHERE A.company_id = B.id) AS employees
                FROM IS601_MP2_Companies B
                WHERE 1=1"""
     args = [] # <--- append values to replace %s placeholders

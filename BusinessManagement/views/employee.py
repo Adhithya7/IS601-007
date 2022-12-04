@@ -11,7 +11,7 @@ def search():
     rows = []
     # DO NOT DELETE PROVIDED COMMENTS
     # TODO search-1 retrieve employee id as id, first_name, last_name, email, company_id, company_name using a LEFT JOIN
-    query = """ SELECT A.id, first_name, last_name, email, company_id, name FROM IS601_MP2_Employees A
+    query = """ SELECT A.id, first_name, last_name, email, company_id, name as company_name FROM IS601_MP2_Employees A
                 LEFT JOIN IS601_MP2_Companies B on A.company_id=B.id
                 WHERE 1=1"""
     args = [] # <--- append values to replace %s placeholders
@@ -24,11 +24,11 @@ def search():
     # TODO search-7 append sorting if column and order are provided and within the allowed columns and order options (asc, desc)
     # TODO search-8 append limit (default 10) or limit greater than 1 and less than or equal to 100
     # TODO search-9 provide a proper error message if limit isn't a number or if it's out of bounds
-    filters = ["first_name", "last_name", "email"]
-    for filter in filters:
-        if request.args.get(filter):
+    filters = [("fn", "first_name"), ("ln", "last_name"), ("email", "email")]
+    for filter_arg,filter in filters:
+        if request.args.get(filter_arg):
             query += f" and {filter} like %s"
-            args.append(f"%{request.args.get(filter)}%")
+            args.append(f"%{request.args.get(filter_arg)}%")
     if request.args.get("company"):
         query += f" and company_id = %s"
         args.append(request.args.get('company'))

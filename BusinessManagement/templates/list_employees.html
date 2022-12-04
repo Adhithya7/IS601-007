@@ -15,14 +15,14 @@
         ensure all fields prefill with request arg data if provided
         #}
         <div class="col-12">
-            <label class="visually-hidden" for="first_name">First Name</label>
-            <input type="text" name="first_name" class="form-control" id="first_name" placeholder="First Name"
-                value="{{request.args.get('first_name') or ''}}">
+            <label class="visually-hidden" for="fn">First Name</label>
+            <input type="text" name="fn" class="form-control" id="fn" placeholder="First Name"
+                value="{{request.args.get('fn') or ''}}">
         </div>
         <div class="col-12">
-            <label class="visually-hidden" for="last_name">Last Name</label>
-            <input type="text" name="last_name" class="form-control" id="last_name" placeholder="Last Name"
-                value="{{request.args.get('last_name') or ''}}">
+            <label class="visually-hidden" for="ln">Last Name</label>
+            <input type="text" name="ln" class="form-control" id="ln" placeholder="Last Name"
+                value="{{request.args.get('ln') or ''}}">
         </div>
         <div class="col-12">
             <label class="visually-hidden" for="email">email</label>
