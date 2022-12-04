@@ -8,6 +8,9 @@ admin = Blueprint('admin', __name__, url_prefix='/admin')
 
 @admin.route("/import", methods=["GET","POST"])
 def importCSV():
+    # UCID: ap2823
+    # Date: 12/04/2022
+    # Method to import csv     
     if request.method == "POST":
         if 'file' not in request.files:
             return redirect(request.url)
@@ -37,6 +40,9 @@ def importCSV():
             # Note: this reads the file as a stream instead of requiring us to save it
             stream = io.TextIOWrapper(file.stream._file, "UTF8", newline=None)
             # TODO importcsv-2 read the csv file stream as a dict
+            # UCID: ap2823
+            # Date: 12/04/2022
+            # Reading csv as dict and processing it
             for row in csv.DictReader(stream, delimiter=','):
                 # print(row) #example
                 # TODO importcsv-3 extract company data and append to company list as a dict only with company data
@@ -56,7 +62,7 @@ def importCSV():
                                       "company_name": row.get("company_name", None)})
                
             if len(companies) > 0:
-                print(f"Inserting or updating {len(companies)} companies", "success")
+                print(f"Inserting or updating {len(companies)} companies")
                 try:
                     result = DB.insertMany(company_query, companies)
                     # TODO importcsv-5 display flash message about number of companies inserted
@@ -66,7 +72,7 @@ def importCSV():
                     flash("There was an error loading in the csv data", "danger")
             else:
                 # TODO importcsv-6 display flash message (info) that no companies were loaded
-                flash("No Companies were inserted")
+                flash("No Companies were inserted", "success")
                 pass
             if len(employees) > 0:
                 print(f"Inserting or updating {len(employees)} employees")
