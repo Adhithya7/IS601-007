@@ -34,7 +34,7 @@ def runner(app):
 
 #https://pypi.org/project/pytest-order/
 @pytest.mark.order("second_to_last")
-def test_edit_employee(client):
+def edit_employee(client):
     resp = client.post("/employee/edit?id=-1", data={
         "last name": "_test2",
         "company": -1
