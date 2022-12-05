@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - prod
-      - MP2
 
 # Your workflows jobs.
 jobs:
