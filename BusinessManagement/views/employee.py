@@ -8,6 +8,9 @@ employee = Blueprint('employee', __name__, url_prefix='/employee')
 
 @employee.route("/search", methods=["GET"])
 def search():
+    # UCID: ap2823
+    # Date: 12/04/2022
+    # Method to search employee using request args
     rows = []
     # DO NOT DELETE PROVIDED COMMENTS
     # TODO search-1 retrieve employee id as id, first_name, last_name, email, company_id, company_name using a LEFT JOIN
@@ -60,6 +63,9 @@ def search():
 
 @employee.route("/add", methods=["GET","POST"])
 def add():
+    # UCID: ap2823
+    # Date: 12/04/2022
+    # Method to add employee using WT-Forms
     form = Employee(request.form)
     if request.method == "POST":
         form_data = {}
@@ -96,6 +102,9 @@ def add():
 
 @employee.route("/edit", methods=["GET", "POST"])
 def edit():
+    # UCID: ap2823
+    # Date: 12/04/2022
+    # Method to edit employee using request args and WTforms
     # TODO edit-1 request args id is required (flash proper error message)
     row = None
     form = Employee(request.form)
@@ -153,7 +162,7 @@ def edit():
     else:
         flash("Employee ID is missing", "danger")
     # TODO edit-10 pass the employee data to the render template
-    return render_template("edit_employee.html", form=form, company=row["company_id"])
+    return render_template("edit_employee.html", form=form, company=row.get("company_id"))
 
 @employee.route("/delete", methods=["GET"])
 def delete():
@@ -161,6 +170,9 @@ def delete():
     # TODO delete-2 redirect to employee search
     # TODO delete-3 pass all argument except id to this route
     # TODO delete-4 ensure a flash message shows for successful delete
+    # UCID: ap2823
+    # Date: 12/04/2022
+    # Method to delete employee using employee_id and then redirect to listing page
     if request.method == "GET":
         emp_id = request.args.get("id")
         if not emp_id:

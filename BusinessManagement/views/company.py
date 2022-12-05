@@ -6,6 +6,9 @@ company = Blueprint('company', __name__, url_prefix='/company')
 
 @company.route("/search", methods=["GET"])
 def search():
+    # UCID: ap2823
+    # Date: 12/04/2022
+    # Method to search companies using request args
     rows = []
     # DO NOT DELETE PROVIDED COMMENTS
     # TODO search-1 retrieve id, name, address, city, country, state, zip, website, employee count for the company
@@ -60,6 +63,9 @@ def search():
 
 @company.route("/add", methods=["GET","POST"])
 def add():
+    # UCID: ap2823
+    # Date: 12/04/2022
+    # Method to add companies using WTForms
     form = Company(request.form)
     if request.method == "POST":
         form_data = {}
@@ -102,6 +108,9 @@ def add():
 
 @company.route("/edit", methods=["GET", "POST"])
 def edit():
+    # UCID: ap2823
+    # Date: 12/04/2022
+    # Method to edit companies using WTForms
     form = Company(request.form)
     # TODO edit-1 request args id is required (flash proper error message)
     if request.args.get('id'): # TODO update this for TODO edit-1
@@ -149,6 +158,9 @@ def edit():
                     print(e)
                     # TODO edit-10 make this user-friendly
                     flash(f"Unexpected error while trying to edit company: {e}", "danger")
+        # UCID: ap2823
+        # Date: 12/04/2022
+        # Fetching the newly updated record
         try:
             # TODO edit-11 fetch the updated data
             result = DB.selectOne("""SELECT * FROM IS601_MP2_Companies
@@ -169,7 +181,7 @@ def edit():
     else:
         flash("Company ID is missing", "danger")
     # TODO edit-13 pass the company data to the render template
-    return render_template("edit_company.html", form=form)
+    return render_template("edit_company.html", form=form, country=row.get("country"), state=row.get("state"))
 
 @company.route("/delete", methods=["GET"])
 def delete():
@@ -177,6 +189,10 @@ def delete():
     # TODO delete-2 redirect to company search
     # TODO delete-3 pass all argument except id to this route
     # TODO delete-4 ensure a flash message shows for successful delete
+    # UCID: ap2823
+    # Date: 12/04/2022
+    # Method to delete company using company_id and then redirect to listing page
+    # All references are set to NULL before deleting the company
     if request.method == "GET":
         cmp_id = request.args.get("id")
         if not cmp_id:
