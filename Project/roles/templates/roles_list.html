@@ -3,9 +3,9 @@
 {% block content %}
 <div class="container-fluid">
     <div class="h1">List Roles</div>
-    <table class="table">
+    <table class="table table-striped table-bordered" >
         {% if rows and rows|length > 0 %}
-        <thead>
+        <thead class="thead-dark">
             <tr class="text-capitalize">
                 {% for r in rows[0] %}
                 <th>{{r}}</th>
