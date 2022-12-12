@@ -13,8 +13,8 @@
         <!-- will map elements via form attribute on the element itself by form id -->
         <input type="submit" class="btn btn-primary" value="Apply Roles" />
     </form>
-    <table class="table">
-        <thead>
+    <table class="table table-striped table-bordered" >
+        <thead class="thead-dark">
             <tr>
                 <td>Users</td>
                 <td>Roles</td>
@@ -27,7 +27,7 @@
                     <table class="table">
                         {% set rows = users %}
                         {% if rows and rows|length > 0 %}
-                        <thead>
+                        <table class="table table-striped table-bordered" >
                             <tr class="text-capitalize">
                                 {% for r in rows[0] %}
                                 <th>{{r}}</th>
@@ -54,10 +54,10 @@
                 </td>
                 <td>
                     <!-- roles -->
-                    <table class="table">
+                    <table class="table table-striped table-bordered" >
                         {% set rows = roles %}
                         {% if rows and rows|length > 0 %}
-                        <thead>
+                        <thead class="thead-dark">
                             <tr class="text-capitalize">
                                 {% for r in rows[0] %}
                                 <th>{{r}}</th>
