@@ -19,7 +19,7 @@ def permission_denied(e):
     return render_template("403.html"), 403
 
 def unauthorized(e):
-    return render_template("403.html"), 401
+    return render_template("401.html"), 401
 
 login_manager = flask_login.LoginManager()
 # app = Flask(__name__)
