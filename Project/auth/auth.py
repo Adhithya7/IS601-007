@@ -79,9 +79,18 @@ def login():
                 flash(str(e), "danger")
     return render_template("login.html", form=form)
 
-@auth.route("/logout", methods=["GET","POST"])
+@auth.route("/logout", methods=["GET"])
 def logout():
-    pass
+    logout_user()
+     # Remove session keys set by Flask-Principal
+    for key in ('identity.name', 'identity.auth_type'):
+        session.pop(key, None)
+
+    # Tell Flask-Principal the user is anonymous
+    identity_changed.send(current_app._get_current_object(),
+                          identity=AnonymousIdentity())
+    flash("Successfully logged out", "success")
+    return redirect(url_for("auth.login"))
 
 @auth.route("/profile", methods=["GET","POST"])
 def profile():
