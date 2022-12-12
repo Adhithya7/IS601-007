@@ -6,7 +6,9 @@ from dotenv import load_dotenv
 load_dotenv()
 import flask_login
 from flask_login import current_user
-from flask_principal import identity_loaded, UserNeed, Principal
+from flask_principal import identity_loaded, RoleNeed, UserNeed, Principal
+# added so modules can be found between the two different lookup states:
+# from tests and from regular running of the app
 CURR_DIR = os.path.dirname(os.path.abspath(__file__))
 print(CURR_DIR)
 sys.path.append(CURR_DIR)
@@ -38,7 +40,10 @@ def create_app(config_filename=''):
         app.register_blueprint(sample)
         from auth.auth import auth
         app.register_blueprint(auth)
+        from roles.roles import roles
+        app.register_blueprint(roles)
 
+        # load the extension
         principals = Principal(app) # must be defined/initialized for identity to work (flask_principal)
         @login_manager.user_loader
         def load_user(user_id):
@@ -71,9 +76,19 @@ def create_app(config_filename=''):
             # Add the UserNeed to the identity
             if hasattr(current_user, 'id'):
                 identity.provides.add(UserNeed(current_user.id))
+
+            # Assuming the User model has a list of roles, update the
+            # identity with the roles that the user provides
+            if hasattr(current_user, 'roles'):
+                for role in current_user.roles:
+                    identity.provides.add(RoleNeed(role.name))
         return app
 
+
+
+
 app = create_app()
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
