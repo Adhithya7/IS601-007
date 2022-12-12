@@ -54,10 +54,19 @@ def login():
             try:
                 result = DB.selectOne("SELECT id, email, username, password FROM IS601_Users where email= %(email)s or username=%(email)s", {"email":email})
                 if result.status and result.row:
+                    from roles.models import Role
                     hash = result.row["password"]
                     if bcrypt.check_password_hash(hash, password):
                         del result.row["password"] # don't carry password/hash beyond here
                         user = User(**result.row)
+                        # get roles
+                        result = DB.selectAll("""
+                        SELECT name FROM IS601_Roles r JOIN IS601_UserRoles ur on r.id = ur.role_id WHERE ur.user_id = %s AND r.is_active = 1 AND ur.is_active = 1
+                        """, user.id)
+                        if result.status and result.rows:
+                            print("role rows", result.rows)
+                            user.roles = [Role(**r) for r in result.rows]
+                        print(f"Roles: {user.roles}")
                         success = login_user(user) # login the user via flask_login
                         
                         if success:
