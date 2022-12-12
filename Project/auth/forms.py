@@ -45,4 +45,13 @@ class LoginForm(AuthForm):
         else:
             is_valid_username(email)
         return True
-                
+
+class ProfileForm(AuthForm):
+    current_password = PasswordField("current password", validators=[Optional()])
+    # https://wtforms.readthedocs.io/en/3.0.x/forms/#form-inheritance
+    def __init__(self, *args, **kwargs):
+        super(ProfileForm, self).__init__( *args, **kwargs)
+        # replace required validator with optional
+        self.password.validators[0]=Optional()
+        self.confirm.validators[0]=Optional()
+    submit = SubmitField("Update")
