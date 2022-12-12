@@ -22,3 +22,27 @@ class AuthForm(FlaskForm):
         is_valid_username(field.data)
 class RegisterForm(AuthForm):
     submit = SubmitField("Register")
+
+class LoginForm(AuthForm):
+    email = StringField("email or username", validators=[DataRequired()]) #EmailField("email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Login")
+    def __init__(self, *args, **kwargs):
+        super(LoginForm, self).__init__( *args, **kwargs)
+        if len(self.password.validators) >= 2:
+            self.password.validators.pop(1)
+        del self.confirm
+        del self.username
+        
+    # https://wtforms.readthedocs.io/en/stable/validators/#custom-validators
+    def validate_email(form, field):
+        email = field.data
+        from email_validator import validate_email
+        if "@" in email:
+            try:
+                validate_email(email)
+            except:
+                raise ValidationError("Invalid email address")
+        else:
+            is_valid_username(email)
+        return True
+                

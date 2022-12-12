@@ -4,8 +4,9 @@ import sys
 from flask import Flask, session, render_template
 from dotenv import load_dotenv
 load_dotenv()
-# added so modules can be found between the two different lookup states:
-# from tests and from regular running of the app
+import flask_login
+from flask_login import current_user
+from flask_principal import identity_loaded, UserNeed, Principal
 CURR_DIR = os.path.dirname(os.path.abspath(__file__))
 print(CURR_DIR)
 sys.path.append(CURR_DIR)
@@ -17,12 +18,14 @@ def page_not_found(e):
 def permission_denied(e):
     return render_template("403.html"), 403
 
+login_manager = flask_login.LoginManager()
 # app = Flask(__name__)
 def create_app(config_filename=''):
     app = Flask(__name__)
     app.register_error_handler(404, page_not_found)
     app.register_error_handler(403, permission_denied)
     app.secret_key = os.environ.get("SECRET_KEY", "missing_secret")
+    login_manager.init_app(app)
     # app.config.from_pyfile(config_filename)
     with app.app_context():
         from views.hello import hello
@@ -32,6 +35,38 @@ def create_app(config_filename=''):
         from auth.auth import auth
         app.register_blueprint(auth)
 
+        principals = Principal(app) # must be defined/initialized for identity to work (flask_principal)
+        @login_manager.user_loader
+        def load_user(user_id):
+            if user_id is None:
+                return None
+            print("login_manager loading user") # happens each request
+            from auth.models import User
+            if session["_user_id"] == user_id and "user" in session.keys():
+                print("loading user from session")
+                # load user from session (convert json to User)
+                # see User object for convering json of roles to [Roles]
+                import jsons
+                return jsons.loads(session["user"], User)
+            # failsafe if we don't have a "user" key in session
+            from sql.db import DB
+            print("loading user from DB") # note: we'd lose roles here since it makes a new user object without a roles query
+            try:
+                result = DB.selectOne("SELECT id, email FROM IS601_Users WHERE id = %s", user_id)
+                if result.status:
+                    return User(**result.row)
+            except Exception as e:
+                print(e)
+            return None
+
+        @identity_loaded.connect_via(app)
+        def on_identity_loaded(sender, identity):
+            # Set the identity user object
+            identity.user = current_user
+
+            # Add the UserNeed to the identity
+            if hasattr(current_user, 'id'):
+                identity.provides.add(UserNeed(current_user.id))
         return app
 
 app = create_app()
