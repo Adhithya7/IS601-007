@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block title %}Shop{% endblock %}
+
+<!-- content -->
+{% block content %}
+<div class="container-fluid">
+    <div class="h4">Shop</div>
+    <form class="row row-cols-lg-auto g-3 align-items-center" method="GET">
+        <div class="col-12">
+            <label class="visually-hidden" for="name">name</label>
+            <input type="text" name="name" class="form-control" id="name" placeholder="Product Name"
+                value="{{request.args.get('name') or ''}}">
+        </div>
+        <div class="col-12">
+            <label class="visually-hidden" for="description">description</label>
+            <input type="text" name="description" class="form-control" id="description" placeholder="Description"
+                value="{{request.args.get('description') or ''}}">
+        </div>
+        {% with cols = allowed_columns %}
+        {% include "sort_filter.html" %}
+        {% endwith %}
+        <div class="col-12">
+            <label class="visually-hidden" for="limit">Limit</label>
+            <input class="form-control" type="number" min="1" max="100" id="limit" name="limit"
+                value="{{request.args.get('limit') or '25'}}" />
+        </div>
+        <div class="col-12">
+            <input type="submit" class="btn btn-primary" value="Filter" />
+        </div>
+        <div class="col-12">
+            <a href="?" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+    <div class="row">
+        {% for row in rows %}
+        <div class="col">
+            <div class="card text-light bg-dark border" style="width: 20em">
+                <div class="card-header">
+                    Stock: {{row["stock"]}}
+                </div>
+                <div class="card-body">
+                    <div class="card-title">
+                        {{row["name"]}}
+                    </div>
+                    {% if row["image"] %}
+                    <img src="{{row['image']}}" style="aspect-ratio: 1; width:100%">
+                    {% endif %}
+                    <div class="card-text lead">
+                        {{row["description"]}}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="card-text lead">
+                        Cost: {{row["unit_price"]}}
+                    </div>
+                    {% if current_user.has_role("Admin") %}
+                    <div class="card-text lead">
+                        Available: {{row["visibility"]}}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
