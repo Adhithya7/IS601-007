@@ -4,7 +4,7 @@
 <!-- content -->
 {% block content %}
 {% from "_table_helper.html" import render_table %}
-{% set view = "admin.item" %}
+{% set view = "admin.view_item" %}
 {% set edit = "admin.item" %}
 {% set delete = "admin.delete" %}
 {{render_table("Items", rows, ["user_id"], view, edit, delete)}}

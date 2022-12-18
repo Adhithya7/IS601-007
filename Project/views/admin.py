@@ -13,48 +13,58 @@ def item():
     # UCID: ap2823
     # Date: 12/17/2022
     # Method to add/edit item as admin
-    if request.method == "POST":
-        form = ItemForm()
-        id = request.args.get("id", form.id.data or None)
-        type = "Edit" if id else "Create"
-        if id:
-            result = DB.selectOne("SELECT id, name, description, stock, unit_price, image FROM IS601_S_Items WHERE id = %s", id)
-            form.process(MultiDict(result.row))
-        if form.validate_on_submit():
-            visibility = True if int(form.stock.data) > 0 else False
-            if form.id.data: # it's an update
-                try:
-                    result = DB.update("UPDATE IS601_S_Items set name = %s, description = %s, stock = %s, unit_price = %s, image=%s, visbility=%s WHERE id = %s",
-                    form.name.data, form.description.data, form.stock.data, form.unit_price.data, form.image.data, visibility, form.id.data)
-                    if result.status:
-                        flash(f"Updated {form.name.data}", "success")
-                except Exception as e:
-                    print("Error updating item", e)
-                    flash(f"Error updating item {form.name.data}", "danger")
-            else: # it's a create
-                try:
-                    result = DB.update("""INSERT INTO IS601_S_Items (name, description, stock, unit_price, image, visibility) 
-                    VALUES (%s,%s,%s,%s,%s,%s)""",
-                    form.name.data, form.description.data, form.stock.data, form.unit_price.data, form.image.data, visibility)
-                    if result.status:
-                        flash(f"Created {form.name.data}", "success")
-                        form = ItemForm() # clear form
-                except Exception as e:
-                    print("Error creating item", e)
-                    flash(f"Error creating item {form.name.data}", "danger")
-        return render_template("item.html", form=form, type=type)
+    form = ItemForm()
+    id = request.args.get("id", form.id.data or None)
+    type = "Edit" if id else "Create"
+    if id:
+        result = DB.selectOne("SELECT id, name, description, stock, unit_price, image FROM IS601_S_Items WHERE id = %s", id)
+        form.process(MultiDict(result.row))
+    if form.validate_on_submit():
+        visibility = True if int(form.stock.data) > 0 else False
+        if form.id.data: # it's an update
+            try:
+                result = DB.update("UPDATE IS601_S_Items set name = %s, description = %s, stock = %s, unit_price = %s, image=%s, visbility=%s WHERE id = %s",
+                form.name.data, form.description.data, form.stock.data, form.unit_price.data, form.image.data, visibility, form.id.data)
+                if result.status:
+                    flash(f"Updated {form.name.data}", "success")
+            except Exception as e:
+                print("Error updating item", e)
+                flash(f"Error updating item {form.name.data}", "danger")
+        else: # it's a create
+            try:
+                result = DB.update("""INSERT INTO IS601_S_Items (name, description, stock, unit_price, image, visibility) 
+                VALUES (%s,%s,%s,%s,%s,%s)""",
+                form.name.data, form.description.data, form.stock.data, form.unit_price.data, form.image.data, visibility)
+                if result.status:
+                    flash(f"Created {form.name.data}", "success")
+                    form = ItemForm() # clear form
+            except Exception as e:
+                print("Error creating item", e)
+                flash(f"Error creating item {form.name.data}", "danger")
 
-    elif request.method == "GET":
+    if id:
         try:
-            id = request.args.get("id", form.id.data or None)
             result = DB.selectOne("SELECT id, name, description, stock, unit_price, image FROM IS601_S_Items WHERE id = %s", id)
             if result.status and result.row:
-                rows = result.row
+                form.process(MultiDict(result.row))
         except Exception as e:
             print("Error fetching item", e)
             flash("Item not found", "danger")
-            rows = []
-        return render_template("view_item.html", rows=rows)
+    return render_template("item.html", form=form, type=type)
+    
+@admin.route("/admin/view_item", methods=["GET","POST"])
+@admin_permission.require(http_exception=403)
+def view_item():
+    try:
+        id = request.args.get("id", None)
+        result = DB.selectOne("SELECT id, name, description, stock, unit_price, image FROM IS601_S_Items WHERE id = %s", id)
+        if result.status and result.row:
+            rows = result.row
+    except Exception as e:
+        print("Error fetching item", e)
+        flash("Item not found", "danger")
+        rows = []
+    return render_template("view_item.html", rows=rows if rows else {})
 
 @admin.route("/admin/items/delete", methods=["GET"])
 @admin_permission.require(http_exception=403)
@@ -80,7 +90,7 @@ def items():
     # UCID: ap2823
     # Date: 12/17/2022
     # Method to view item as admin user
-    rows = []
+    rows = {}
     query = """SELECT id, name, description, stock, unit_price, image, visibility
                FROM IS601_S_Items LIMIT 25"""
     try:
