@@ -41,3 +41,17 @@ def shop_list():
         print(tb.format_exc())
         flash("There was a problem loading items", "danger")
     return render_template("shop.html", rows=rows, allowed_columns=allowed_columns)
+
+@shop.route("/shop/item", methods=["GET","POST"])
+@login_required
+def shop_item():
+    try:
+        id = request.args.get("id" or None)
+        result = DB.selectOne("SELECT id, name, description, stock, unit_price, image FROM IS601_S_Items WHERE id = %s", id)
+        if result.status and result.row:
+            rows = result.row
+    except Exception as e:
+        print("Error fetching item", e)
+        flash("Item not found", "danger")
+        rows = []
+    return render_template("view_item.html", rows=rows)
