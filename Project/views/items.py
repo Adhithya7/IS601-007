@@ -73,40 +73,44 @@ def cart():
     if id and user_id:
         if quantity > 0:
             try:
-                result = DB.selectOne("SELECT unit_price,name from IS601_S_Items WHERE id = %s", id)
+                result = DB.selectOne("SELECT unit_price,name,stock from IS601_S_Items WHERE id = %s", id)
                 print("result", result)
                 if result.status and result.row:
                     unit_price = result.row["unit_price"]
                     name = result.row["name"]
-                    if item_id: # update from cart
-                        result = DB.insertOne("""
-                        UPDATE IS601_S_Cart SET
-                        quantity = %(quantity)s,
-                        unit_price = %(unit_price)s
-                        WHERE item_id = %(id)s and user_id = %(user_id)s
-                        """,{
-                            "id":id,
-                            "quantity": quantity,
-                            "unit_price":unit_price,
-                            "user_id":user_id
-                        })
-                        if result.status:
-                            flash(f"Updated quantity for {name} to {quantity}", "success")
-                    else: #add from shop
-                        result = DB.insertOne("""
-                        INSERT INTO IS601_S_Cart (item_id, quantity, unit_price, user_id)
-                        VALUES(%(id)s, %(quantity)s, %(unit_price)s, %(user_id)s)
-                        ON DUPLICATE KEY UPDATE
-                        quantity = quantity + %(quantity)s,
-                        unit_price = %(unit_price)s
-                        """,{
-                            "id":id,
-                            "quantity": quantity,
-                            "unit_price":unit_price,
-                            "user_id":user_id
-                        })
-                        if result.status:
-                            flash(f"Added {quantity} of {name} to cart", "success")
+                    stock = result.row["stock"]
+                    if quantity > stock:
+                        flash(f"{quantity} {name}s are not available; Please reduce the quantity", "danger")
+                    else:
+                        if item_id: # update from cart
+                            result = DB.insertOne("""
+                            UPDATE IS601_S_Cart SET
+                            quantity = %(quantity)s,
+                            unit_price = %(unit_price)s
+                            WHERE item_id = %(id)s and user_id = %(user_id)s
+                            """,{
+                                "id":id,
+                                "quantity": quantity,
+                                "unit_price":unit_price,
+                                "user_id":user_id
+                            })
+                            if result.status:
+                                flash(f"Updated quantity for {name} to {quantity}", "success")
+                        else: #add from shop
+                            result = DB.insertOne("""
+                            INSERT INTO IS601_S_Cart (item_id, quantity, unit_price, user_id)
+                            VALUES(%(id)s, %(quantity)s, %(unit_price)s, %(user_id)s)
+                            ON DUPLICATE KEY UPDATE
+                            quantity = quantity + %(quantity)s,
+                            unit_price = %(unit_price)s
+                            """,{
+                                "id":id,
+                                "quantity": quantity,
+                                "unit_price":unit_price,
+                                "user_id":user_id
+                            })
+                            if result.status:
+                                flash(f"Added {quantity} of {name} to cart", "success")
             except Exception as e:
                 print("Error updating cart" ,e)
                 flash("Error updating cart", "danger")
