@@ -45,6 +45,9 @@ def shop_list():
 @shop.route("/shop/item", methods=["GET","POST"])
 @login_required
 def shop_item():
+    # UCID: ap2823
+    # Date: 12/17/2022
+    # Method to view item as a logged-in user
     try:
         id = request.args.get("id" or None)
         result = DB.selectOne("SELECT id, name, description, stock, unit_price, image FROM IS601_S_Items WHERE id = %s", id)
@@ -55,3 +58,76 @@ def shop_item():
         flash("Item not found", "danger")
         rows = []
     return render_template("view_item.html", rows=rows)
+
+@shop.route("/cart", methods=["GET","POST"])
+@login_required
+def cart():
+    # UCID: ap2823
+    # Date: 12/17/2022
+    # Method to add item to a cart as a logged-in user
+    item_id = request.form.get("item_id")
+    id = request.form.get("id", item_id)
+    print("id", id)
+    quantity = request.form.get("quantity", 1, type=int)
+    user_id = current_user.get_id()
+    if id and user_id:
+        if quantity > 0:
+            try:
+                result = DB.selectOne("SELECT unit_price,name from IS601_S_Items WHERE id = %s", id)
+                print("result", result)
+                if result.status and result.row:
+                    unit_price = result.row["unit_price"]
+                    name = result.row["name"]
+                    if item_id: # update from cart
+                        result = DB.insertOne("""
+                        UPDATE IS601_S_Cart SET
+                        quantity = %(quantity)s,
+                        unit_price = %(unit_price)s
+                        WHERE item_id = %(id)s and user_id = %(user_id)s
+                        """,{
+                            "id":id,
+                            "quantity": quantity,
+                            "unit_price":unit_price,
+                            "user_id":user_id
+                        })
+                        if result.status:
+                            flash(f"Updated quantity for {name} to {quantity}", "success")
+                    else: #add from shop
+                        result = DB.insertOne("""
+                        INSERT INTO IS601_S_Cart (item_id, quantity, unit_price, user_id)
+                        VALUES(%(id)s, %(quantity)s, %(unit_price)s, %(user_id)s)
+                        ON DUPLICATE KEY UPDATE
+                        quantity = quantity + %(quantity)s,
+                        unit_price = %(unit_price)s
+                        """,{
+                            "id":id,
+                            "quantity": quantity,
+                            "unit_price":unit_price,
+                            "user_id":user_id
+                        })
+                        if result.status:
+                            flash(f"Added {quantity} of {name} to cart", "success")
+            except Exception as e:
+                print("Error updating cart" ,e)
+                flash("Error updating cart", "danger")
+        else:
+            # assuming delete
+            try:
+                result = DB.delete("DELETE FROM IS601_S_Cart where item_id = %s and user_id = %s", id, user_id)
+                if result.status:
+                    flash("Deleted item from cart", "success")
+            except Exception as e:
+                print("Error deleting item", e)
+                flash("Error deleting item from cart", "danger")
+    rows = []
+    try:
+        result = DB.selectAll("""SELECT c.id, item_id, name, c.quantity, (c.quantity * c.unit_price) as subtotal 
+        FROM IS601_S_Cart c JOIN IS601_S_Items i on c.item_id = i.id
+        WHERE c.user_id = %s
+        """, current_user.get_id())
+        if result and result.rows:
+            rows = result.rows
+    except Exception as e:
+        print("Error getting cart", e)
+        flash("Error fetching cart", "danger")
+    return render_template("cart.html", rows=rows)

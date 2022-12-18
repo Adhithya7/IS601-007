@@ -59,6 +59,9 @@ def item():
 @admin.route("/admin/items/delete", methods=["GET"])
 @admin_permission.require(http_exception=403)
 def delete():
+    # UCID: ap2823
+    # Date: 12/18/2022
+    # Method to delete item as admin
     id = request.args.get("id")
     if id:
         try:
@@ -76,7 +79,7 @@ def delete():
 def items():
     # UCID: ap2823
     # Date: 12/17/2022
-    # Method to view item as a logged-in user
+    # Method to view item as admin user
     rows = []
     query = """SELECT id, name, description, stock, unit_price, image, visibility
                FROM IS601_S_Items LIMIT 25"""
