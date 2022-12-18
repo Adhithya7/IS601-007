@@ -46,7 +46,6 @@ def item():
 
     elif request.method == "GET":
         try:
-            form = ItemForm()
             id = request.args.get("id", form.id.data or None)
             result = DB.selectOne("SELECT id, name, description, stock, unit_price, image FROM IS601_S_Items WHERE id = %s", id)
             if result.status and result.row:
@@ -55,8 +54,7 @@ def item():
             print("Error fetching item", e)
             flash("Item not found", "danger")
             rows = []
-        print(rows)
-        return render_template("view_item.html", form=form, rows=rows)
+        return render_template("view_item.html", rows=rows)
 
 @admin.route("/admin/items/delete", methods=["GET"])
 @admin_permission.require(http_exception=403)
