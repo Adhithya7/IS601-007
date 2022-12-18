@@ -76,7 +76,7 @@ def login():
                             # store user object in session as json
                             session["user"] = user.toJson()
                             flash("Log in successful", "success")
-                            return redirect(url_for("auth.landing_page"))
+                            return redirect(url_for("shop.shop_list"))
                         else:
                             flash("Error logging in", "danger")
                 else:

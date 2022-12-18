@@ -8,9 +8,7 @@ CREATE TABLE
         created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
         check (quantity >= 0),
-        -- don't allow negative stock; I don't allow backorders
         check (unit_price >= 0),
-        -- don't allow negative costs
         FOREIGN KEY (user_id) REFERENCES IS601_Users(id),
         FOREIGN KEY(item_id) REFERENCES IS601_S_Items(id),
         UNIQUE KEY (item_id, user_id)
