@@ -16,14 +16,21 @@ def item():
     form = ItemForm()
     id = request.args.get("id", form.id.data or None)
     type = "Edit" if id else "Create"
-    if id:
-        result = DB.selectOne("SELECT id, name, description, stock, unit_price, image FROM IS601_S_Items WHERE id = %s", id)
-        form.process(MultiDict(result.row))
+    if id and not form.name.data:
+        try:
+            result = DB.selectOne("SELECT id, name, description, stock, unit_price, image FROM IS601_S_Items WHERE id = %s", id)
+            if result.status and result.row:
+                form.process(MultiDict(result.row))
+        except Exception as e:
+            print("Error fetching item", e)
+            flash("Item not found", "danger")
+        return render_template("item.html", form=form, type=type)
+
     if form.validate_on_submit():
         visibility = True if int(form.stock.data) > 0 else False
         if form.id.data: # it's an update
             try:
-                result = DB.update("UPDATE IS601_S_Items set name = %s, description = %s, stock = %s, unit_price = %s, image=%s, visbility=%s WHERE id = %s",
+                result = DB.update("UPDATE IS601_S_Items set name = %s, description = %s, stock = %s, unit_price = %s, image=%s, visibility=%s WHERE id = %s",
                 form.name.data, form.description.data, form.stock.data, form.unit_price.data, form.image.data, visibility, form.id.data)
                 if result.status:
                     flash(f"Updated {form.name.data}", "success")
@@ -42,7 +49,6 @@ def item():
                 print("Error creating item", e)
                 flash(f"Error creating item {form.name.data}", "danger")
 
-    if id:
         try:
             result = DB.selectOne("SELECT id, name, description, stock, unit_price, image FROM IS601_S_Items WHERE id = %s", id)
             if result.status and result.row:
@@ -101,3 +107,8 @@ def items():
         print(tb.format_exc())
         flash("There was a problem loading items", "danger")
     return render_template("admin_items.html", rows=rows)
+
+@admin.route("/admin/orders", methods=["GET","POST"])
+@admin_permission.require(http_exception=403)
+def orders():
+    pass
