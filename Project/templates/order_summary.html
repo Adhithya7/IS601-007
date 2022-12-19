@@ -5,9 +5,13 @@
 <!-- content -->
 {% block content %}
 <div class="container-fluid">
-    <div class="h4">Order Summary:</div>
-    <div class="h5">Order Number: #{{order['order_id']}}:</div>
-    {{render_table("Ordered Items", rows, ["user_id"])}}
-    <div>Order Total: ${{order['total']}}</div>
-    <div class="h6">Thank you for ordering from us! Please wait for 4-5 business days for the package to get delivered. :)</div>
+<div class="h2">Order Summary:</div>
+<div class="h3">Order Number #{{order['id']}}:</div>
+{{render_table("Address and Billing Details", order_info , [])}}
+<br>
+<br>
+{{render_table("Ordered Items", rows, ["user_id"])}}
+<div>Order Total: ${{order['total']}}</div>
+<br>
+<div class="h4">Thank you for ordering from us! Please wait for 4-5 business days for the package to get delivered. :)</div>
 {% endblock %}
