@@ -296,13 +296,18 @@ def place_order():
             flash("Purchase successful!", "success")
         else:
             return redirect(url_for("shop.cart"))
+        order_info = [{"First_name": request.form.get('fname'),
+                        "Last_name": request.form.get('lname'),
+                        "Address": request.form.get('address'),
+                        "Payment_Method": request.form.get('payment')
+                        }]
     except Exception as e:
         print("Transaction exception", e)
         flash("Something went wrong", "danger")
         flash("Any amount debited will be refunded in 2-4 business days", "warning")
         tb.print_exc()
         return redirect(url_for("shop.cart"))
-    return render_template("order_summary.html", rows=cart, order=order)
+    return render_template("order_summary.html", rows=cart, order=order, order_info=order_info)
 
 @shop.route("/payment", methods=["POST"])
 @login_required
@@ -323,3 +328,60 @@ def payment():
     if missing:
         return redirect(url_for("shop.confirm_order"))
     return render_template("payment.html", form=form_data)
+
+@shop.route("/orders", methods=["GET"])
+@login_required
+def orders():
+    # UCID: ap2823
+    # Date: 12/17/2022
+    # Method to make payment
+    rows = []
+    try:
+        result = DB.selectAll("""
+        SELECT id, total_price, number_of_items, created FROM IS601_S_Orders WHERE user_id = %s
+        """, current_user.get_id())
+        if result.status and result.rows:
+            rows = result.rows
+    except Exception as e:
+        print("Error getting orders", e)
+        flash("Error fetching orders", "danger")
+    return render_template("orders.html", rows=rows)
+
+@shop.route("/order", methods=["GET"])
+@login_required
+def order():
+    # UCID: ap2823
+    # Date: 12/17/2022
+    # Method to make payment
+    rows = []
+    total = 0
+    id = request.args.get("id")
+    if not id:
+        flash("Invalid order", "danger")
+        return redirect(url_for("shop.orders"))
+    try:
+        # locking query to order_id and user_id so the user can see only their orders
+        result = DB.selectAll("""
+        SELECT name, oi.unit_price, oi.quantity, (oi.unit_price*oi.quantity) as subtotal 
+        FROM IS601_S_OrderItems oi 
+        JOIN IS601_S_Items i on oi.item_id = i.id 
+        WHERE order_id = %s ANd user_id = %s
+        """, id, current_user.get_id())
+        if result.status and result.rows:
+            rows = result.rows
+            total = sum(int(row["subtotal"]) for row in rows)
+        result = DB.selectAll("""
+        SELECT first_name, last_name, address, payment_method
+        FROM IS601_S_Orders where id=%s
+        """, id)
+        if result.status and result.rows:
+            order_info = result.rows
+    except Exception as e:
+        print("Error getting order", e)
+        flash("Error fetching order", "danger")
+        rows = []
+        total = None
+        order_info = []
+    print(rows)
+    print(order_info)
+    return render_template("order.html", rows=rows, total=total, order_info=order_info )
