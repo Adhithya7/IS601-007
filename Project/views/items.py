@@ -49,7 +49,7 @@ def shop_item():
     # Date: 12/17/2022
     # Method to view an item as a logged-in user
     try:
-        id = request.args.get("id" or None)
+        id = request.form.get("id" or None)
         result = DB.selectOne("SELECT id, name, description, stock, unit_price, image FROM IS601_S_Items WHERE id = %s", id)
         if result.status and result.row:
             rows = result.row
@@ -57,7 +57,7 @@ def shop_item():
         print("Error fetching item", e)
         flash("Item not found", "danger")
         rows = []
-    return render_template("view_item.html", rows=rows)
+    return render_template("view_item.html", rows=rows if rows else {})
 
 @shop.route("/cart", methods=["GET","POST"])
 @login_required

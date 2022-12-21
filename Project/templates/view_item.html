@@ -6,7 +6,11 @@
             <h5 class="card-title">{{ rows.get('name') }}</h5>
             <br>
             {% for k,v in rows.items() %}
+            {% if k=='image'%}
+            <span class="label label-default">{{k}}: <img src="{{v}}" style="aspect-ratio: 1; width:100%"></span>
+            {% else %}
             <span class="label label-default">{{k}}: {{v}}</span>
+            {% endif %}
             <br>
             <br>
             {% endfor %}
