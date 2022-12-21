@@ -279,7 +279,8 @@ def place_order():
         if not has_error:
             result = DB.update("""
             UPDATE IS601_S_Items 
-                set stock = stock - (select IFNULL(quantity, 0) FROM IS601_S_Cart WHERE item_id = IS601_S_Items.id and user_id = %(uid)s) 
+                set stock = stock - (select IFNULL(quantity, 0) FROM IS601_S_Cart WHERE item_id = IS601_S_Items.id and user_id = %(uid)s),
+                visibility = (select if(IFNULL(quantity, 0)>0, 1, 0) FROM IS601_S_Cart WHERE item_id = IS601_S_Items.id and user_id = %(uid)s) 
                 WHERE id in (SELECT item_id from IS601_S_Cart where user_id = %(uid)s)
             """, {"uid":current_user.get_id()} )
             if not result.status:
