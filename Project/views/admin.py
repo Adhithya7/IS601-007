@@ -61,6 +61,9 @@ def item():
 @admin.route("/admin/view_item", methods=["GET","POST"])
 @admin_permission.require(http_exception=403)
 def view_item():
+    # UCID: ap2823
+    # Date: 12/18/2022
+    # Method to view item as admin
     try:
         id = request.args.get("id", None)
         result = DB.selectOne("SELECT id, name, description, stock, unit_price, image FROM IS601_S_Items WHERE id = %s", id)
@@ -111,6 +114,9 @@ def items():
 @admin.route("/admin/orders", methods=["GET","POST"])
 @admin_permission.require(http_exception=403)
 def orders():
+    # UCID: ap2823
+    # Date: 12/18/2022
+    # Method to list all orders
     rows = []
     try:
         result = DB.selectAll("""
@@ -130,7 +136,7 @@ def orders():
 def order():
     # UCID: ap2823
     # Date: 12/17/2022
-    # Method to make payment
+    # Method to view a particular order details
     rows = []
     total = 0
     id = request.args.get("id")

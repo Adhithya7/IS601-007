@@ -53,6 +53,12 @@
                     <div class="card-text lead">
                         Cost: {{row["unit_price"]}}
                     </div>
+                    <form action="{{url_for('shop.shop_item')}}" method="POST">
+                        <input type="hidden" name="id" value="{{row['id']}}" />
+                        <div class="d-grid mt-1">
+                            <input type="submit" value="View" class="btn btn-light" />
+                        </div>
+                    </form>
                     {% if current_user.has_role("Admin") %}
                     <form action="{{url_for('admin.item')}}" method="POST">
                         <input type="hidden" name="id" value="{{row['id']}}" />
