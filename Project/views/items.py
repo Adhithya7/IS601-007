@@ -336,7 +336,7 @@ def payment():
 def orders():
     # UCID: ap2823
     # Date: 12/17/2022
-    # Method to make payment
+    # Method to list all orders specific to the logged in user
     rows = []
     try:
         result = DB.selectAll("""
@@ -354,7 +354,7 @@ def orders():
 def order():
     # UCID: ap2823
     # Date: 12/17/2022
-    # Method to make payment
+    # Method to view a specific order
     rows = []
     total = 0
     id = request.args.get("id")
