@@ -6,7 +6,6 @@ import traceback as tb
 shop = Blueprint('shop', __name__, url_prefix='/',template_folder='templates')
 
 @shop.route("/shop", methods=["GET","POST"])
-@login_required
 def shop_list():
     # UCID: ap2823
     # Date: 12/17/2022
@@ -43,7 +42,6 @@ def shop_list():
     return render_template("shop.html", rows=rows, allowed_columns=allowed_columns)
 
 @shop.route("/shop/item", methods=["GET","POST"])
-@login_required
 def shop_item():
     # UCID: ap2823
     # Date: 12/17/2022
