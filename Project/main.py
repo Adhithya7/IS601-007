@@ -36,10 +36,12 @@ def create_app(config_filename=''):
     with app.app_context():
         from views.hello import hello
         app.register_blueprint(hello)
-        from views.sample import sample
-        app.register_blueprint(sample)
+        from views.admin import admin
+        app.register_blueprint(admin)
         from auth.auth import auth
         app.register_blueprint(auth)
+        from views.items import shop
+        app.register_blueprint(shop)
         from roles.roles import roles
         app.register_blueprint(roles)
 

@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block title %}Payment{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <form class="form-group mb-3 align-items-center" action="{{url_for('shop.place_order')}}"
+            method="POST">
+        <div class="col-12 text-center">
+            <label for="total">Amount to be paid</label>
+            <input type="text" name="total" class="form-control" id="total" placeholder="0" readonly
+                value="{{request.form.get('total') or form.get('money_received') or ''}}">
+        </div>
+        <br>
+        <div class="col-12 text-center">
+            <label for="money_received">Enter Payment Amount</label>
+            <input type="text" name="money_received" class="form-control" id="money_received" placeholder="Enter Amount"
+                value="{{request.form.get('money_received') or form.get('money_received') or ''}}">
+        </div>
+        <div class="col-12 text-center">
+            <input type="submit" value="Pay" class="btn btn-danger btn-sm" />
+        </div>
+        <input type="hidden" name="fname" value="{{request.form.get('fname') or form.get('fname') or ''}}" />
+        <input type="hidden" name="lname" value="{{request.form.get('lname') or form.get('lname') or ''}}" />
+        <input type="hidden" name="address" value="{{request.form.get('address') or form.get('address') or ''}}" />
+        <input type="hidden" name="payment" value="{{request.form.get('payment') or form.get('payment') or ''}}" />
+    </form>
+</div>
+{% endblock %}

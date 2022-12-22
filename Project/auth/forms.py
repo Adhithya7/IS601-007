@@ -15,8 +15,8 @@ class AuthForm(FlaskForm):
     # shared form that groups most of our validations together to reduce repetition
     username = StringField("username", validators=[DataRequired(), Length(2, 30)])
     email = EmailField("email", validators=[DataRequired(), Email()])
-    password = PasswordField("password", validators=[DataRequired(), EqualTo('confirm', message='Passwords must match'), Length(8)])
-    confirm = PasswordField("confirm", validators=[DataRequired(),  EqualTo('password', message='Passwords must match'),Length(8)])
+    password = PasswordField("new password", validators=[DataRequired(), EqualTo('confirm', message='Passwords must match'), Length(8)])
+    confirm = PasswordField("confirm new password", validators=[DataRequired(),  EqualTo('password', message='Passwords must match'),Length(8)])
     def validate_username(form, field):
         print("checking ", field.data)
         is_valid_username(field.data)
