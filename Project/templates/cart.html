@@ -35,15 +35,17 @@
                     </form>
                 </td>
                 <td>{{row['subtotal']}}</td>
-                <td></td>
                 <td>
-                    <!-- lazy delete using quantity < 0 logic -->
+                    <a href="{{url_for('shop.shop_item')}}?id={{row['item_id']}}">View</a>
                     <form method="POST">
                         <input type="hidden" name="item_id" value="{{row['item_id']}}" />
                         <input type="hidden" name="quantity" value="-1" />
                         <input type="submit" value="x" class="btn btn-danger btn-sm" />
                     </form>
-
+                </td>
+                <td>
+                    <!-- lazy delete using quantity < 0 logic -->
+                    
                 </td>
                 {# https://stackoverflow.com/a/51880609 #}
                 {% set ns.total = ns.total + row['subtotal'] %}
