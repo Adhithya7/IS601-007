@@ -35,6 +35,7 @@
                     </form>
                 </td>
                 <td>{{row['subtotal']}}</td>
+                <td></td>
                 <td>
                     <!-- lazy delete using quantity < 0 logic -->
                     <form method="POST">
@@ -42,6 +43,7 @@
                         <input type="hidden" name="quantity" value="-1" />
                         <input type="submit" value="x" class="btn btn-danger btn-sm" />
                     </form>
+
                 </td>
                 {# https://stackoverflow.com/a/51880609 #}
                 {% set ns.total = ns.total + row['subtotal'] %}
